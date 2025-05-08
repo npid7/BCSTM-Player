@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "3DS GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/BCSTM-Player.elf",
+            "miDebuggerServerAddress": "localhost:4003",
+            "miDebuggerPath": "C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gdb.exe",
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
