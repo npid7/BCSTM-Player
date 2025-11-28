@@ -52,8 +52,9 @@ jobs:
           ninja
           cd ..
           mkdir -p ~/artifacts
-          cp build/BCSTM-Player.3dsx ~/artifacts
-          cp build/BCSTM-Player.cia ~/artifacts
+          cp bin/BCSTM-Player.3dsx ~/artifacts
+          cp bin/BCSTM-Player.cia ~/artifacts
+          cp bin/BCSTM-Player.elf ~/artifacts # ELF for debugging
           echo ::set-output name=commit_tag::$(git describe --abbrev=0 --tags)
           echo ::set-output name=commit_hash::$(git log --format=%h -1)
           # Webhook info
@@ -107,7 +108,7 @@ jobs:
           CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
           echo ::set-output name=current_date::$CURRENT_DATE
           git config --global user.email "tobid7@outlook.de"
-          git config --global user.name "Tobi-D7"
+          git config --global user.name "tobid7"
           git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/NPI-D7/nightlys.git
           cd nightlys
           mkdir -p builds/BCSTM-Player/
