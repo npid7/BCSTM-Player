@@ -36,9 +36,7 @@ class BcstmPlayer {
   PD::u32 pCurrentBlock = 0;
   PD::u32 pActiveChannels = 0;
   PD::Vec<PD::u16> pChannels;
-  PD::Vec<PD::Vec<ndspWaveBuf>> pWaveBuf;
-  PD::Vec<PD::u8, PD::LinearAlloc<PD::u8>> pBufferData[8][20];
-  // PD::Vec<PD::Vec<u8*>> pBufferData;
-  // PD::Vec<PD::Vec<PD::Vec<u8, PD::LinearAlloc<u8>>> pBufferData;
+  std::vector<std::vector<ndspWaveBuf>> pWaveBuf;
+  std::vector<std::vector<PD::Vec<u8, PD::LinearAlloc<u8>>>> pBufferData;
 };
 }  // namespace D7

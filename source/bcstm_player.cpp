@@ -12,18 +12,18 @@ void BcstmPlayer::LoadFile(const std::string& path) {
   /** Resize the Player Internal Data holders */
   /** Using this allows to not have to much memory allocated */
   pChannels.Resize(pCurrentFile.GetNumChannels());
-  pWaveBuf.Resize(pCurrentFile.GetNumChannels());
-  // pBufferData.Resize(pCurrentFile.GetNumChannels());
-  for (PD::u32 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
-    pWaveBuf[i].Resize(BufferCount);
-    // pBufferData[i].Resize(BufferCount);
+  pWaveBuf.resize(pCurrentFile.GetNumChannels());
+  pBufferData.resize(pCurrentFile.GetNumChannels());
+  for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
+    pWaveBuf[i].resize(BufferCount);
+    pBufferData[i].resize(BufferCount);
   }
   pIsLoaded = true;
 }
 
 void BcstmPlayer::Play() {
   if (pIsPaused) {
-    for (PD::u32 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
+    for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
       ndspChnSetPaused(pChannels[i], false);
     }
     pIsPaused = false;
@@ -83,8 +83,7 @@ void BcstmPlayer::Play() {
     ndspChnSetMix(pChannels[i], mix);
     ndspChnSetAdpcmCoefs(pChannels[i],
                          pCurrentFile.pDSP_ADPCM_Info[i].Param.Coefficients);
-
-    for (unsigned int j = 0; j < BufferCount; j++) {
+    for (int j = 0; j < BufferCount; j++) {
       /** still Prefer fill_n over memset */
       std::memset(&pWaveBuf[i][j], 0, sizeof(ndspWaveBuf));
       pWaveBuf[i][j].status = NDSP_WBUF_DONE;
@@ -145,14 +144,15 @@ void BcstmPlayer::pFillBuffers() {
       this->Stop();
     }
 
-    for (PD::u32 chn_idx = 0; chn_idx < pCurrentFile.GetNumChannels();
+    for (PD::u8 chn_idx = 0; chn_idx < pCurrentFile.GetNumChannels();
          ++chn_idx) {
       ndspWaveBuf* buf = &pWaveBuf[chn_idx][buf_idx];
 
       memset(buf, 0, sizeof(ndspWaveBuf));
-      buf->data_adpcm = pBufferData[chn_idx][buf_idx].Data();
+      buf->adpcm_data =
+          (ndspAdpcmData*)pBufferData.at(chn_idx).at(buf_idx).Data();
       pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8*)buf->adpcm_data);
-      DSP_FlushDataCache(buf->data_adpcm, pCurrentFile.GetBlockSize());
+      DSP_FlushDataCache(buf->adpcm_data, pCurrentFile.GetBlockSize());
 
       if (pCurrentBlock == 0) {
         buf->adpcm_data =
@@ -187,7 +187,9 @@ void BcstmPlayer::CleanUp() {
   pIsStreaming = false;
   pIsPaused = false;
   pActiveChannels = 0;
+  pCurrentBlock = 0;
   pChannels.Clear();
-  pWaveBuf.Clear();
+  pWaveBuf.clear();
+  pBufferData.clear();
 }
 }  // namespace D7
