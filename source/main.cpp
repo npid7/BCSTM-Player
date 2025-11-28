@@ -46,11 +46,14 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
       PD::Color(.94f - .17f * color_effect, .61f - .25f * color_effect,
                 .36f + .38f * color_effect));
 }
-
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   while (true) {
     if (ctrl->pFileLoaded) {
+#ifdef CTRFF_DECODE
+      ctrl->plr.Stream();
+#else
       ctrl->plr.Update();
+#endif
     }
     if (ctrl->pRequests.Size() == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -84,17 +87,6 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   }
 }
 
-/** Toter thread (prefetch kernel panic fehler bei BCSTM::ReadBlock) */
-void BCSTMPlayerThread2(D7::BcstmPlayer* player, bool* running) {
-  while (*running) {
-    PD::TT::Beg("BCSTM_UPT");
-    player->Stream();
-    PD::TT::End("BCSTM_UPT");
-    /** Sleep only 200ms due to thread is not killable */
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-  }
-}
-
 FileMgr::Ref Filebrowser;
 Inspector::Ref FileInspector;
 BCSTM_Ctrl bcstm_ctrl;
@@ -104,12 +96,13 @@ void BottomScreenBeta(PD::LI::DrawList::Ref l) {
   l->DrawRectFilled(5, fvec2(310, 20), 0xff111111);
   l->DrawRectFilled(7, fvec2(306, 16), 0xff222222);
   float scale = 0.f;
+#ifndef CTRFF_DECODE
   if (bcstm_ctrl.plr.GetTotal() != 0) {
     scale =
         (float)bcstm_ctrl.plr.GetCurrent() / (float)bcstm_ctrl.plr.GetTotal();
   }
+#endif
   l->DrawRectFilled(7, fvec2(306 * scale, 16), 0xff00ff00);
-  l->DrawText(fvec2(5, 30), std::format(""), 0xffffffff);
 }
 
 int main() {
@@ -149,7 +142,7 @@ int main() {
     PD::Ctr::AddDrawList(rl2, false);
     PD::Ctr::AddDrawList(rl3, true);
     PD::Ctr::AddDrawList(Stage::GetDrawDataTop(), false);
-    PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
+    // PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Ctr::GetContext().Inp->IsDown(PD::Ctr::GetContext().Inp->Start)) {
       break;
     }

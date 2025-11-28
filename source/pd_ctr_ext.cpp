@@ -8,8 +8,13 @@ constexpr u32 DisplayTransferFlags =
      GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) |
      GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
 
+bool pExceptionCtx = false;
+bool pExceptionCtxA = false;
 /** Seems to not work if it happens in another thread */
 void HandleException(const std::string& e) {
+  pExceptionCtx = true;
+  while (!pExceptionCtxA) {
+  }
   gfxInitDefault();
   consoleInit(GFX_TOP, nullptr);
   std::cout << "Palladium Exception Handler\n\n";
@@ -22,6 +27,7 @@ void HandleException(const std::string& e) {
     }
   }
   gfxExit();
+  std::abort();
 }
 
 void CxxExceptionHandler() {
@@ -87,6 +93,7 @@ void DestroyContext(Context* ctx) {
   ctx->Gfx = nullptr;
   C3D_Fini();
   gfxExit();
+  pExceptionCtxA = true;
 }
 
 bool ContextUpdate() {
@@ -111,7 +118,7 @@ bool ContextUpdate() {
   C3D_FrameEnd(0);
   c->DrawLists[0].Clear();
   c->DrawLists[1].Clear();
-  return aptMainLoop();
+  return aptMainLoop() && !pExceptionCtx;
 }
 
 PD::LI::Texture::Ref GetWhiteTex() {

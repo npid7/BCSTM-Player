@@ -117,11 +117,11 @@ void Inspector::Update() {
 
 /** MagicStr crates a string of the memory (unsafe) */
 std::string MagicStr(PD::u32 v) {
-  return std::format("{:08X} -> {}", v, std::string((char*)&v, 4));
+  return std::format("0x{:08X} -> {}", v, std::string((char*)&v, 4));
 }
 
 /** Simply oneliner to fix stringstream problem with char values */
-std::string _8Str(const PD::u8& v) { return std::format("{:02X}", v); }
+std::string _8Str(const PD::u8& v) { return std::format("0x{:02X}", v); }
 
 /** Universal Type to hex string func */
 template <typename T>
@@ -130,8 +130,8 @@ std::string _Str(const T& v) {
     return _8Str(v);
   }
   std::stringstream s;
-  s << std::uppercase << std::hex << std::setw(sizeof(T)) << std::setfill('0')
-    << v;
+  s << "0x" << std::uppercase << std::hex << std::setw(sizeof(T))
+    << std::setfill('0') << v;
   return s.str();
 }
 

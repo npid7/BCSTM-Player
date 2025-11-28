@@ -16,7 +16,7 @@ void FileMgr::Update() {
   }
   if (pShowHelp) {
     Top->Text(
-           "Controls:\nUp -> Go 1 Entry Up\nDown -> Go 1 Entry Sown\nLeft -> "
+           "Controls:\nUp -> Go 1 Entry Up\nDown -> Go 1 Entry Down\nLeft -> "
            "Go 5 "
            "Entries Up\nRight -> Go 5 Entries Down\nA -> Go into Directory / "
            "Play "
@@ -98,6 +98,7 @@ void FileMgr::Update() {
     if (Inp->IsDown(Inp->A)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Dir) {
+        pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
         cursor.SetIndex(0);
         sp = 0;
         ScanDir(FSE.Path);
@@ -114,8 +115,14 @@ void FileMgr::Update() {
         if (cPath == "sdmc:") {
           cPath += "/";
         }
-        cursor.SetIndex(0);
-        sp = 0;
+        if (!pLastPos.IsEmpty()) {
+          sp = pLastPos.Top().First;
+          cursor.SetIndex(pLastPos.Top().Second);
+          pLastPos.Pop();
+        } else {
+          sp = 0;
+          cursor.SetIndex(0);
+        }
         ScanDir(cPath);
       }
     }

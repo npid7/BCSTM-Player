@@ -4,7 +4,7 @@
             "name": "3DS GDB",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/BCSTM-Player.elf",
+            "program": "${workspaceFolder}/bin/BCSTM-Player.elf",
             "miDebuggerServerAddress": "localhost:4003",
             "miDebuggerPath": "C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gdb.exe",
             "cwd": "${workspaceFolder}",

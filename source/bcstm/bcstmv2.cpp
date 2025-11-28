@@ -2,7 +2,7 @@
 
 #include <bcstm/bcstmv2.hpp>
 
-bool D7::BCSTM2::LoadFile(const std::string &path) {
+bool D7::BCSTM2::LoadFile(const std::string& path) {
   Stop();
   pFile.open(path, std::ios::in | std::ios::binary);
   if (!pFile) {
@@ -76,13 +76,13 @@ bool D7::BCSTM2::LoadFile(const std::string &path) {
   off.close();
   // get adpcm data
   for (unsigned int i = 0; i < channel_count; i++) {
-    pFile.read(reinterpret_cast<char *>(adpcm_coefs[i]),
+    pFile.read(reinterpret_cast<char*>(adpcm_coefs[i]),
                sizeof(unsigned short) * 16);
     // beginning context
-    pFile.read(reinterpret_cast<char *>(&adpcm_data[i][0]),
+    pFile.read(reinterpret_cast<char*>(&adpcm_data[i][0]),
                sizeof(ndspAdpcmData));
     // loop context
-    pFile.read(reinterpret_cast<char *>(&adpcm_data[i][1]),
+    pFile.read(reinterpret_cast<char*>(&adpcm_data[i][1]),
                sizeof(ndspAdpcmData));
     // skip padding
     Read<u16>();
@@ -235,12 +235,12 @@ void D7::BCSTM2::fill_buffers() {
 
     for (unsigned int channelIndex = 0; channelIndex < channel_count;
          ++channelIndex) {
-      ndspWaveBuf *buf = &wave_buf[channelIndex][bufIndex];
+      ndspWaveBuf* buf = &wave_buf[channelIndex][bufIndex];
 
       memset(buf, 0, sizeof(ndspWaveBuf));
       buf->data_adpcm = buffer_data[channelIndex][bufIndex].Data();
       pFile.read(
-          reinterpret_cast<char *>(buf->data_adpcm),
+          reinterpret_cast<char*>(buf->data_adpcm),
           (current_block == num_blocks - 1) ? last_block_size : block_size);
       DSP_FlushDataCache(buf->data_adpcm, block_size);
 

@@ -16,6 +16,7 @@ class FileMgr : public Stage {
   PD_SMART_CTOR(FileMgr)
 
   Cursor cursor = Cursor(fvec2(0.f, 18.f), 17.f);
+  PD::Stack<PD::Pair<int, int>> pLastPos;
   int sp = 0;
   PD::Timer delta;
 

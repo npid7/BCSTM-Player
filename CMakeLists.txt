@@ -38,6 +38,9 @@ set(3DS_IP "192.168.2.224" CACHE STRING "3ds IP (make send)")
 # Set Project
 project(BCSTM-Player LANGUAGES C CXX VERSION 2.0.0)
 
+# Decode with CTRFF
+option(CTRFF_DECODE "Decode music data with ctrff (WIP)" OFF)
+
 # Enable Compile Command Export
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -45,8 +48,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+# Better location to not always crash Citra / Azahar
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
 # Set Special C and CXX flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-psabi -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-psabi")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -fno-rtti")
 
 add_subdirectory(palladium)
@@ -64,13 +70,13 @@ add_executable(BCSTM-Player
     #source/config.cpp
 
     source/bcstm/bcstmv2.cpp
-    #source/bcstm_player.cpp
+    source/bcstm_player.cpp
 
     source/flex/objects.cpp
 )
 
 # Set dependencies, include dirs and definitions
-target_link_libraries(BCSTM-Player PUBLIC m ctrff pd-backend-3ds palladium citro3d ctru)
+target_link_libraries(BCSTM-Player PUBLIC m ctrff pd-backend-3ds palladium citro3d ctrud)
 target_include_directories(BCSTM-Player PUBLIC
     source
     ${DEVKITPRO}/portlibs/3ds/include
@@ -81,10 +87,14 @@ target_compile_definitions(BCSTM-Player PUBLIC
     -DGIT_COMMIT="${GIT_SHORT_HASH}"
 )
 
+if(${CTRFF_DECODE})
+    target_compile_definitions(BCSTM-Player PUBLIC -DCTRFF_DECODE=1)
+endif()
+
 # Command to send to console (make send)
 add_custom_target(
     send
-    COMMAND 3dslink -a "${3DS_IP}" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.3dsx"
+    COMMAND 3dslink -a "${3DS_IP}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.3dsx"
 )
 
 ## Graphics
@@ -115,7 +125,7 @@ ctr_generate_smdh(
 )
 ctr_create_3dsx(
     BCSTM-Player
-    OUTPUT "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.3dsx"
+    OUTPUT "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.3dsx"
     SMDH "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.smdh"
     ROMFS "${APP_ROMFS}"
     DEPENDS create_resources
@@ -134,11 +144,11 @@ add_custom_command(
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.cia
+    OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.cia
     COMMAND ${MAKEROM}
     -f cia -target t -exefslogo
-    -o "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.cia"
-    -elf "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf"
+    -o "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.cia"
+    -elf "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf"
     -rsf ${APP_RSF}
     -banner "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bnr"
     -icon "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.smdh"
@@ -155,5 +165,5 @@ add_custom_target(make_banner ALL
 )
 
 add_custom_target(make_cia ALL
-    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bnr ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.cia
+    DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bnr ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.cia
 )
