@@ -35,5 +35,6 @@ class Inspector : public Stage {
   std::vector<TabEntry::Ref> pDL;
   std::vector<TabEntry::Ref> List;
   PD::Stack<std::vector<TabEntry::Ref>> pStack;
+  PD::Stack<PD::Pair<int, int>> pLastPos;
   std::string pPath;
 };

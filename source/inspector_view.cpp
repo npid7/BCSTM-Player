@@ -96,6 +96,7 @@ void Inspector::Update() {
   if (Inp->IsDown(Inp->A)) {
     auto FSE = pDL.at(cursor.pIndex + sp);
     if (FSE->SubData.size() != 0) {
+      pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
       cursor.SetIndex(0);
       sp = 0;
       pStack.Push(pDL);
@@ -104,8 +105,14 @@ void Inspector::Update() {
   }
 
   if (Inp->IsDown(Inp->B)) {
-    cursor.SetIndex(0);
-    sp = 0;
+    if (!pLastPos.IsEmpty()) {
+      sp = pLastPos.Top().First;
+      cursor.SetIndex(pLastPos.Top().Second);
+      pLastPos.Pop();
+    } else {
+      sp = 0;
+      cursor.SetIndex(0);
+    }
     if (pStack.IsEmpty()) {
       Back();
     } else {
