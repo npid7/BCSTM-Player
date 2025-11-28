@@ -57,12 +57,12 @@ jobs:
           cp bin/BCSTM-Player.3dsx ~/artifacts
           cp bin/BCSTM-Player.cia ~/artifacts
           cp bin/BCSTM-Player.elf ~/artifacts
-          echo "commit_tag=$(git describe --abbrev=0 --tags)" >> $GITHUB_ENV
-          echo "commit_hash=$(git log --format=%h -1)" >> $GITHUB_ENV
-          echo "author_name=$(git log -1 $GITHUB_SHA --pretty=%aN)" >> $GITHUB_ENV
-          echo "committer_name=$(git log -1 $GITHUB_SHA --pretty=%cN)" >> $GITHUB_ENV
-          echo "commit_subject=$(git log -1 $GITHUB_SHA --pretty=%s)" >> $GITHUB_ENV
-          echo "commit_message=$(git log -1 $GITHUB_SHA --pretty=%b)" >> $GITHUB_ENV
+          echo "commit_tag=$(git describe --abbrev=0 --tags)" >> $GITHUB_OUTPUT
+          echo "commit_hash=$(git log --format=%h -1)" >> $GITHUB_OUTPUT
+          echo "author_name=$(git log -1 $GITHUB_SHA --pretty=%aN)" >> $GITHUB_OUTPUT
+          echo "committer_name=$(git log -1 $GITHUB_SHA --pretty=%cN)" >> $GITHUB_OUTPUT
+          echo "commit_subject=$(git log -1 $GITHUB_SHA --pretty=%s)" >> $GITHUB_OUTPUT
+          echo "commit_message=$(git log -1 $GITHUB_SHA --pretty=%b)" >> $GITHUB_OUTPUT
 
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v4
@@ -76,10 +76,10 @@ jobs:
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: build
     env:
-      COMMIT_TAG: ${{ env.commit_tag }}
-      COMMIT_HASH: ${{ env.commit_hash }}
-      AUTHOR_NAME: ${{ env.author_name }}
-      COMMIT_MESSAGE: ${{ env.commit_message }}
+      COMMIT_TAG: ${{ needs.build.commit_tag }}
+      COMMIT_HASH: ${{ needs.build.commit_hash }}
+      AUTHOR_NAME: ${{ needs.build.author_name }}
+      COMMIT_MESSAGE: ${{ needs.build.commit_message }}
     outputs:
       current_date: ${{ steps.commit.outputs.current_date }}
     steps:
