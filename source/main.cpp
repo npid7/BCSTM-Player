@@ -1,6 +1,4 @@
-#include <bcstm/bcstmv2.hpp>
 #include <bcstm_ctrl.hpp>
-#include <bcstm_player.hpp>
 #include <filebrowser.hpp>
 #include <flex/flex.hpp>
 #include <inspector_view.hpp>
@@ -14,15 +12,10 @@
 /**
  * Code is very unstable currently cause
  * 1. PD Ctr Extension is unfinished pre alpha
- * 2. Still using the bcstm/bcstmv2 impl which is based on the initial code
- * implementing the 1 to 8 channel support of bcstm_player.cpp
- * 3. bcstm_player.cpp is unused dead code due to it somehow crashes the fs
- * module on data block read
- * 4. inspector_view contains some bugs
- * 5. the flex ui engine is a small lib planned to be more simple then ui7 but
+ * 2. the flex ui engine is a small lib planned to be more simple then ui7 but
  * the way it works is bad
- * 6. The whole code around the stage_mgr is just in alpha state
- * 7. The whole code of bcstm_player 2.0.0 is completly hardcoded with extern
+ * 3. The whole code around the stage_mgr is just in alpha state
+ * 4. The whole code of bcstm_player 2.0.0 is completly hardcoded with extern
  * references through all the code and still very unfinished
  */
 
@@ -47,9 +40,10 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
                 .36f + .38f * color_effect));
 }
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
+  ctrl->player = new D7::BCSTM2;  // Stable
   while (true) {
     if (ctrl->pFileLoaded) {
-      ctrl->plr.Stream();
+      ctrl->player->Stream();
     }
     if (ctrl->pRequests.Size() == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -57,7 +51,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
       auto t = ctrl->pRequests.Front();
       if (t.req == BCSTM_Ctrl::OpenFile) {
         try {
-          ctrl->plr.LoadFile(t.req_dat);
+          ctrl->player->LoadFile(t.req_dat);
           /**
            * Set to true cause it would get set to false
            * if an error got thrown
@@ -68,13 +62,13 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
           ctrl->pFileLoaded = false;
         }
       } else if (t.req == BCSTM_Ctrl::CloseFile) {
-        ctrl->plr.Stop();
+        ctrl->player->Stop();
       } else if (t.req == BCSTM_Ctrl::Stop) {
-        ctrl->plr.Stop();
+        ctrl->player->Stop();
       } else if (t.req == BCSTM_Ctrl::Play) {
-        ctrl->plr.Play();
+        ctrl->player->Play();
       } else if (t.req == BCSTM_Ctrl::Pause) {
-        ctrl->plr.Pause();
+        ctrl->player->Pause();
       } else if (t.req == BCSTM_Ctrl::KillThread) {
         break; /** Break the loop */
       }
@@ -92,27 +86,22 @@ void BottomScreenBeta(PD::LI::DrawList::Ref l) {
   l->DrawRectFilled(5, fvec2(310, 20), 0xff111111);
   l->DrawRectFilled(7, fvec2(306, 16), 0xff222222);
   float scale = 0.f;
-  D7::BcstmPlayer ll;
 
-  if (bcstm_ctrl.plr.GetTotal() != 0) {
-    scale =
-        (float)bcstm_ctrl.plr.GetCurrent() / (float)bcstm_ctrl.plr.GetTotal();
+  if (bcstm_ctrl.player->GetTotal() != 0) {
+    scale = (float)bcstm_ctrl.player->GetCurrent() /
+            (float)bcstm_ctrl.player->GetTotal();
   }
   l->DrawRectFilled(7, fvec2(306 * scale, 16), 0xff00ff00);
   l->DrawText(
       PD::fvec2(7, 28),
-      std::format("Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
-                  "Loop Start: "
-                  "{}\n  Loop End: {}\n  Decoder: {}",
-                  bcstm_ctrl.plr.GetCurrent(), bcstm_ctrl.plr.GetTotal(),
-                  bcstm_ctrl.plr.GetSampleRate(), bcstm_ctrl.plr.IsLooping(),
-                  bcstm_ctrl.plr.GetLoopStart(), bcstm_ctrl.plr.GetLoopEnd(),
-#ifdef CTRFF_DECODE
-                  "CTRFF (WIP)"
-#else
-                  "BCSTMV2"
-#endif
-                  ),
+      std::format(
+          "Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
+          "Loop Start: "
+          "{}\n  Loop End: {}\n  Decoder: {}",
+          bcstm_ctrl.player->GetCurrent(), bcstm_ctrl.player->GetTotal(),
+          bcstm_ctrl.player->GetSampleRate(), bcstm_ctrl.player->IsLooping(),
+          bcstm_ctrl.player->GetLoopStart(), bcstm_ctrl.player->GetLoopEnd(),
+          bcstm_ctrl.player->GetName()),
       0xffffffff);
 }
 

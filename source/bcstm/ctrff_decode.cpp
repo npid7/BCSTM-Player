@@ -1,8 +1,8 @@
-#include <bcstm_player.hpp>
+#include <bcstm/ctrff_decode.hpp>
 #include <cstring> /** std::memset :( */
 
 namespace D7 {
-void BcstmPlayer::LoadFile(const std::string& path) {
+void CTRFFDec::LoadFile(const std::string& path) {
   CleanUp();
   try {
     pCurrentFile.LoadFile(path);
@@ -21,7 +21,7 @@ void BcstmPlayer::LoadFile(const std::string& path) {
   pIsLoaded = true;
 }
 
-void BcstmPlayer::Play() {
+void CTRFFDec::Play() {
   if (pIsPaused) {
     for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
       ndspChnSetPaused(pChannels[i], false);
@@ -93,7 +93,7 @@ void BcstmPlayer::Play() {
   pIsStreaming = true;
 }
 
-void BcstmPlayer::Pause() {
+void CTRFFDec::Pause() {
   if (!pIsStreaming) {
     return;
   }
@@ -103,7 +103,7 @@ void BcstmPlayer::Pause() {
   }
 }
 
-void BcstmPlayer::Stop() {
+void CTRFFDec::Stop() {
   if (!pIsStreaming) {
     return;
   }
@@ -114,7 +114,7 @@ void BcstmPlayer::Stop() {
   pIsStreaming = false;
 }
 
-void BcstmPlayer::Stream() {
+void CTRFFDec::Stream() {
   pCurrentTime = svcGetSystemTick();
   if (pCurrentTime - pLastTime >= 100000000 && pIsLoaded) {
     if (!pIsStreaming) return;
@@ -123,7 +123,7 @@ void BcstmPlayer::Stream() {
   }
 }
 
-void BcstmPlayer::pFillBuffers() {
+void CTRFFDec::pFillBuffers() {
   for (PD::u32 buf_idx = 0; buf_idx < BufferCount; buf_idx++) {
     bool all_ready = true;
     for (PD::u32 ch = 0; ch < pCurrentFile.GetNumChannels(); ch++) {
@@ -172,7 +172,7 @@ void BcstmPlayer::pFillBuffers() {
   }
 }
 
-void BcstmPlayer::CleanUp() {
+void CTRFFDec::CleanUp() {
   Stop();
   if (pIsLoaded) {
     try {

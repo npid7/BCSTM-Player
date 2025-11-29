@@ -7,10 +7,10 @@
 #include <li_backend_c3d.hpp>
 
 namespace D7 {
-class BcstmPlayer : public BCSTMPlayerBase {
+class CTRFFDec : public BCSTMPlayerBase {
  public:
-  BcstmPlayer() = default;
-  ~BcstmPlayer() { CleanUp(); }
+  CTRFFDec() : BCSTMPlayerBase("CTRFF (WIP)") {};
+  ~CTRFFDec() { CleanUp(); }
 
   void LoadFile(const std::string& path);
   void Stream();

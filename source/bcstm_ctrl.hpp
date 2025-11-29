@@ -1,10 +1,7 @@
 #pragma once
 
-#ifdef CTRFF_DECODE
-#include <bcstm_player.hpp>
-#else
 #include <bcstm/bcstmv2.hpp>
-#endif
+#include <bcstm/ctrff_decode.hpp>
 
 struct BCSTM_Ctrl {
   enum ReqType {
@@ -28,11 +25,7 @@ struct BCSTM_Ctrl {
     pRequests.PushBack(Request(t, dat));
   }
 
-#ifdef CTRFF_DECODE
-  D7::BcstmPlayer plr;
-#else
-  D7::BCSTM2 plr;
-#endif
+  D7::BCSTMPlayerBase* player = nullptr;
   PD::List<Request> pRequests;
   bool pFileLoaded = false;
 };

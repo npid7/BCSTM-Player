@@ -38,9 +38,6 @@ set(3DS_IP "192.168.2.224" CACHE STRING "3ds IP (make send)")
 # Set Project
 project(BCSTM-Player LANGUAGES C CXX VERSION 2.0.0)
 
-# Decode with CTRFF
-option(CTRFF_DECODE "Decode music data with ctrff (WIP)" OFF)
-
 # Enable Compile Command Export
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -70,7 +67,7 @@ add_executable(BCSTM-Player
     #source/config.cpp
 
     source/bcstm/bcstmv2.cpp
-    source/bcstm_player.cpp
+    source/bcstm/ctrff_decode.cpp
 
     source/flex/objects.cpp
 )
@@ -86,10 +83,6 @@ target_compile_definitions(BCSTM-Player PUBLIC
     -DVERSION="${PROJECT_VERSION}"
     -DGIT_COMMIT="${GIT_SHORT_HASH}"
 )
-
-if(${CTRFF_DECODE})
-    target_compile_definitions(BCSTM-Player PUBLIC -DCTRFF_DECODE=1)
-endif()
 
 # Command to send to console (make send)
 add_custom_target(

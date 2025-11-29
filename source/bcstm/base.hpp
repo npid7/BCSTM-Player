@@ -35,6 +35,8 @@ class BCSTMPlayerBase {
   virtual unsigned int GetBlcokSize() const { return 0; }
   virtual unsigned int GetBlockSamples() const { return 0; }
 
+  std::string GetName() const { return pName; }
+
   std::string pName = "Unknown";
 };
 }  // namespace D7
