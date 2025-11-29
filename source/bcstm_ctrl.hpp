@@ -11,6 +11,7 @@ struct BCSTM_Ctrl {
     Pause,      /** Can be direct accessded due to no overhead */
     Stop,       /** No Overhead */
     KillThread, /** Should be called on close */
+    SwitchDec,  /** Stops and switches decoder */
   };
   struct Request {
     Request(ReqType t, const std::string& d) {

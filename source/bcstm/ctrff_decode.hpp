@@ -9,7 +9,9 @@
 namespace D7 {
 class CTRFFDec : public BCSTMPlayerBase {
  public:
-  CTRFFDec() : BCSTMPlayerBase("CTRFF (WIP)") {};
+  CTRFFDec() : BCSTMPlayerBase("CTRFF (WIP)", FormatBCSTM | AllChannels) {
+    CleanUp();
+  };
   ~CTRFFDec() { CleanUp(); }
 
   void LoadFile(const std::string& path);

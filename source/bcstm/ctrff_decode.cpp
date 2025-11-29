@@ -4,11 +4,8 @@
 namespace D7 {
 void CTRFFDec::LoadFile(const std::string& path) {
   CleanUp();
-  try {
-    pCurrentFile.LoadFile(path);
-  } catch (const std::exception& e) {
-    throw std::runtime_error(e.what());
-  }
+  pCurrentFile.LoadFile(path);
+
   /** Resize the Player Internal Data holders */
   /** Using this allows to not have to much memory allocated */
   pChannels.Resize(pCurrentFile.GetNumChannels());
@@ -39,7 +36,7 @@ void CTRFFDec::Play() {
         pChannels[i]++;
       }
       if (pChannels[i] == 24) {
-        throw std::range_error(
+        throw std::runtime_error(
             "BCSTM Player: Out of Range (channel == 24) detected!");
       }
       pActiveChannels |= 1 << pChannels[i];
@@ -174,13 +171,7 @@ void CTRFFDec::pFillBuffers() {
 
 void CTRFFDec::CleanUp() {
   Stop();
-  if (pIsLoaded) {
-    try {
-      pCurrentFile.CleanUp();
-    } catch (const std::exception& e) {
-      throw std::runtime_error(e.what());
-    }
-  }
+  pCurrentFile.CleanUp();
   pIsLoaded = false;
   pIsStreaming = false;
   pIsPaused = false;

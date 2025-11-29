@@ -31,6 +31,7 @@ void HandleException(const std::string& e) {
 }
 
 void CxxExceptionHandler() {
+#ifdef __EXCEPTIONS
   std::exception_ptr e_ = std::current_exception();
   if (e_) {
     try {
@@ -41,6 +42,7 @@ void CxxExceptionHandler() {
       HandleException("Unknown Exception");
     }
   }
+#endif
   std::abort();
 }
 

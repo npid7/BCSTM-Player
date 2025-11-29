@@ -48,10 +48,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 # Better location to not always crash Citra / Azahar
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-# Set Special C and CXX flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-psabi")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -fno-rtti")
-
 add_subdirectory(palladium)
 add_subdirectory(palladium/backends/3ds)
 add_subdirectory(ctrff)
@@ -83,6 +79,11 @@ target_compile_definitions(BCSTM-Player PUBLIC
     -DVERSION="${PROJECT_VERSION}"
     -DGIT_COMMIT="${GIT_SHORT_HASH}"
 )
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    target_compile_options(BCSTM-Player PUBLIC
+        -fno-rtti
+    )
+endif()
 
 # Command to send to console (make send)
 add_custom_target(

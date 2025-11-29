@@ -9,8 +9,23 @@
 namespace D7 {
 class BCSTMPlayerBase {
  public:
+  using Features = unsigned int;
+  enum Features_ : Features {
+    None = 0,
+    SingleChannel = 1 << 0,
+    DualChannel = 1 << 1,
+    QuadraChannel = 1 << 2,
+    HexaChannel = 1 << 3,
+    OktaChannel = 1 << 4,
+    AllChannels =
+        SingleChannel | DualChannel | QuadraChannel | HexaChannel | OktaChannel,
+    NonLoopEnd = 1 << 5,
+    FormatBCSTM = 1 << 6,
+    Default =
+        FormatBCSTM | SingleChannel | DualChannel,  // all support these iirc
+  };
   BCSTMPlayerBase() = default;
-  BCSTMPlayerBase(const std::string& n) : pName(n) {}
+  BCSTMPlayerBase(const std::string& n, Features f) : pName(n), pFeatures(f) {}
   virtual ~BCSTMPlayerBase() = default;
 
   virtual void LoadFile(const std::string& path) = 0;
@@ -38,5 +53,6 @@ class BCSTMPlayerBase {
   std::string GetName() const { return pName; }
 
   std::string pName = "Unknown";
+  Features pFeatures = Default;
 };
 }  // namespace D7

@@ -39,6 +39,13 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
       PD::Color(.94f - .17f * color_effect, .61f - .25f * color_effect,
                 .36f + .38f * color_effect));
 }
+
+#ifndef __RTTI
+/// IF NO RTTI WE INITIALIZE THIS AS FALSE
+// CAUSE IT GETS REVERSED LATER
+static bool v2 = false;
+#endif
+
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   ctrl->player = new D7::BCSTM2;  // Stable
   while (true) {
@@ -50,6 +57,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
     } else {
       auto t = ctrl->pRequests.Front();
       if (t.req == BCSTM_Ctrl::OpenFile) {
+#if __EXCEPTIONS
         try {
           ctrl->player->LoadFile(t.req_dat);
           /**
@@ -61,6 +69,10 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
           std::cout << "BCSTM CTRL Error: " << e.what() << std::endl;
           ctrl->pFileLoaded = false;
         }
+#else
+        ctrl->player->LoadFile(t.req_dat);
+        ctrl->pFileLoaded = true;
+#endif
       } else if (t.req == BCSTM_Ctrl::CloseFile) {
         ctrl->player->Stop();
       } else if (t.req == BCSTM_Ctrl::Stop) {
@@ -71,6 +83,19 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
         ctrl->player->Pause();
       } else if (t.req == BCSTM_Ctrl::KillThread) {
         break; /** Break the loop */
+      } else if (t.req == BCSTM_Ctrl::SwitchDec) {
+        ctrl->player->Stop();
+#ifdef __RTTI
+        bool v2 = dynamic_cast<D7::BCSTM2*>(ctrl->player);
+#else
+        v2 = !v2;
+#endif
+        delete ctrl->player;
+        if (v2) {
+          ctrl->player = new D7::CTRFFDec();
+        } else {
+          ctrl->player = new D7::BCSTM2();
+        }
       }
       ctrl->pRequests.PopFront();
     }
@@ -133,6 +158,10 @@ int main() {
   while (PD::Ctr::ContextUpdate()) {
     time.Update();
     rl2->SetFont(font);
+
+    if (PD::Ctr::GetContext().Inp->IsUp(PD::Hid::Y)) {
+      bcstm_ctrl.DoRequest(BCSTM_Ctrl::SwitchDec);
+    }
 
     rl2->DrawRectFilled(fvec2(0, 0), fvec2(400, 240), 0xff64c9fd);
     for (int i = 0; i < 44; i++)
