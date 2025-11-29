@@ -20,6 +20,27 @@ class BcstmPlayer {
   void Stop();
   void Pause();
 
+  /** INFO */
+  inline bool IsLooping() { return pCurrentFile.IsLooping(); }
+  inline bool IsLoaded() { return pIsLoaded; }
+  inline unsigned int GetLoopStart() { return pCurrentFile.GetLoopStart(); }
+  inline unsigned int GetLoopEnd() { return pCurrentFile.GetLoopEnd(); }
+  inline unsigned int GetChannelCount() {
+    return pCurrentFile.GetNumChannels();
+  }
+  inline unsigned int GetTotal() { return pCurrentFile.GetNumBlocks(); }
+  inline unsigned int GetCurrent() { return pCurrentBlock; }
+  inline unsigned int GetSampleRate() { return pCurrentFile.GetSampleRate(); }
+  inline unsigned int GetSamples() const {
+    return 0;  // (block_size * num_blocks) / sample_rate;
+  }
+  inline unsigned int GetBlcokSize() const {
+    return pCurrentFile.GetBlockSize();
+  }
+  inline unsigned int GetBlockSamples() const {
+    return pCurrentFile.GetBlockSamples();
+  }
+
   void pFillBuffers();
 
   /** Probably unused */

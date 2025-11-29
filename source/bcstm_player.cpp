@@ -138,9 +138,8 @@ void BcstmPlayer::pFillBuffers() {
         pCurrentBlock == pCurrentFile.GetLoopEnd()) {
       pCurrentBlock = pCurrentFile.GetLoopStart();
       pCurrentFile.ReadGotoBeginning(true);
-    }
-    if (!pCurrentFile.IsLooping() &&
-        pCurrentBlock == pCurrentFile.GetLoopEnd()) {
+    } else if (!pCurrentFile.IsLooping() &&
+               pCurrentBlock == pCurrentFile.GetLoopEnd()) {
       this->Stop();
     }
 
@@ -149,10 +148,9 @@ void BcstmPlayer::pFillBuffers() {
       ndspWaveBuf* buf = &pWaveBuf[chn_idx][buf_idx];
 
       memset(buf, 0, sizeof(ndspWaveBuf));
-      buf->adpcm_data =
-          (ndspAdpcmData*)pBufferData.at(chn_idx).at(buf_idx).Data();
-      pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8*)buf->adpcm_data);
-      DSP_FlushDataCache(buf->adpcm_data, pCurrentFile.GetBlockSize());
+      buf->data_adpcm = pBufferData.at(chn_idx).at(buf_idx).Data();
+      pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8*)buf->data_adpcm);
+      DSP_FlushDataCache(buf->data_adpcm, pCurrentFile.GetBlockSize());
 
       if (pCurrentBlock == 0) {
         buf->adpcm_data =

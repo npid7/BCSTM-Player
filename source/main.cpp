@@ -96,13 +96,22 @@ void BottomScreenBeta(PD::LI::DrawList::Ref l) {
   l->DrawRectFilled(5, fvec2(310, 20), 0xff111111);
   l->DrawRectFilled(7, fvec2(306, 16), 0xff222222);
   float scale = 0.f;
-#ifndef CTRFF_DECODE
+  D7::BcstmPlayer ll;
+
   if (bcstm_ctrl.plr.GetTotal() != 0) {
     scale =
         (float)bcstm_ctrl.plr.GetCurrent() / (float)bcstm_ctrl.plr.GetTotal();
   }
-#endif
   l->DrawRectFilled(7, fvec2(306 * scale, 16), 0xff00ff00);
+  l->DrawText(
+      PD::fvec2(7, 28),
+      std::format("Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
+                  "Loop Start: "
+                  "{}\n  Loop End: {}",
+                  bcstm_ctrl.plr.GetCurrent(), bcstm_ctrl.plr.GetTotal(),
+                  bcstm_ctrl.plr.GetSampleRate(), bcstm_ctrl.plr.IsLooping(),
+                  bcstm_ctrl.plr.GetLoopStart(), bcstm_ctrl.plr.GetLoopEnd()),
+      0xffffffff);
 }
 
 int main() {
@@ -122,6 +131,7 @@ int main() {
   font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
   auto rl2 = PD::LI::DrawList::New(PD::Ctr::GetWhiteTex());
   auto rl3 = PD::LI::DrawList::New(PD::Ctr::GetWhiteTex());
+  rl3->SetFont(font);
   Filebrowser =
       FileMgr::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
   FileInspector =
