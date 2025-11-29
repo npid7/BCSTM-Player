@@ -49,11 +49,7 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   while (true) {
     if (ctrl->pFileLoaded) {
-#ifdef CTRFF_DECODE
       ctrl->plr.Stream();
-#else
-      ctrl->plr.Update();
-#endif
     }
     if (ctrl->pRequests.Size() == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -107,10 +103,16 @@ void BottomScreenBeta(PD::LI::DrawList::Ref l) {
       PD::fvec2(7, 28),
       std::format("Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
                   "Loop Start: "
-                  "{}\n  Loop End: {}",
+                  "{}\n  Loop End: {}\n  Decoder: {}",
                   bcstm_ctrl.plr.GetCurrent(), bcstm_ctrl.plr.GetTotal(),
                   bcstm_ctrl.plr.GetSampleRate(), bcstm_ctrl.plr.IsLooping(),
-                  bcstm_ctrl.plr.GetLoopStart(), bcstm_ctrl.plr.GetLoopEnd()),
+                  bcstm_ctrl.plr.GetLoopStart(), bcstm_ctrl.plr.GetLoopEnd(),
+#ifdef CTRFF_DECODE
+                  "CTRFF (WIP)"
+#else
+                  "BCSTMV2"
+#endif
+                  ),
       0xffffffff);
 }
 

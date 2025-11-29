@@ -2,15 +2,16 @@
 
 #include <3ds.h>
 
+#include <bcstm/base.hpp>
 #include <cstring>
 #include <fstream>
 #include <li_backend_c3d.hpp>
 #include <pd.hpp>
 
 namespace D7 {
-class BCSTM2 {
+class BCSTM2 : public BCSTMPlayerBase {
  public:
-  BCSTM2() {}
+  BCSTM2() : BCSTMPlayerBase("BCSTMV2") {}
   ~BCSTM2() { Stop(); }
 
   template <typename T>
@@ -47,25 +48,26 @@ class BCSTM2 {
     return o;
   }
 
-  bool LoadFile(const std::string& path);
-  void Update();
+  void LoadFile(const std::string& path);
+  void Stream();
   void Play();
   void Pause();
   void Stop();
+  void CleanUp() { Stop(); }
 
-  inline bool IsLooping() { return this->is_looping; }
-  inline bool IsLoaded() { return this->is_loaded; }
-  inline unsigned int GetLoopStart() { return this->loop_start; }
-  inline unsigned int GetLoopEnd() { return this->loop_end; }
-  inline unsigned int GetChannelCount() { return this->channel_count; }
-  inline unsigned int GetTotal() { return this->num_blocks; }
-  inline unsigned int GetCurrent() { return this->current_block; }
-  inline unsigned int GetSampleRate() { return this->sample_rate; }
-  inline unsigned int GetSamples() const {
+  bool IsLooping() { return this->is_looping; }
+  bool IsLoaded() { return this->is_loaded; }
+  unsigned int GetLoopStart() { return this->loop_start; }
+  unsigned int GetLoopEnd() { return this->loop_end; }
+  unsigned int GetChannelCount() { return this->channel_count; }
+  unsigned int GetTotal() { return this->num_blocks; }
+  unsigned int GetCurrent() { return this->current_block; }
+  unsigned int GetSampleRate() { return this->sample_rate; }
+  unsigned int GetSamples() const {
     return (block_size * num_blocks) / sample_rate;
   }
-  inline unsigned int GetBlcokSize() const { return block_size; }
-  inline unsigned int GetBlockSamples() const { return block_samples; }
+  unsigned int GetBlcokSize() const { return block_size; }
+  unsigned int GetBlockSamples() const { return block_samples; }
 
   bool pBigEndian = false;
   std::fstream pFile;

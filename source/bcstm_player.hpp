@@ -2,11 +2,12 @@
 
 #include <3ds.h>
 
+#include <bcstm/base.hpp>
 #include <ctrff.hpp>
 #include <li_backend_c3d.hpp>
 
 namespace D7 {
-class BcstmPlayer {
+class BcstmPlayer : public BCSTMPlayerBase {
  public:
   BcstmPlayer() = default;
   ~BcstmPlayer() { CleanUp(); }

@@ -2,12 +2,11 @@
 
 #include <bcstm/bcstmv2.hpp>
 
-bool D7::BCSTM2::LoadFile(const std::string& path) {
+void D7::BCSTM2::LoadFile(const std::string& path) {
   Stop();
   pFile.open(path, std::ios::in | std::ios::binary);
   if (!pFile) {
-    std::cout << "BCSTM [ERROR]: Unable to load File!" << std::endl;
-    return false;
+    throw std::runtime_error("BCSTM [ERROR]: Unable to load File!");
   }
   pBigEndian = false;
   is_little_endian = true;  // default to true
@@ -18,8 +17,7 @@ bool D7::BCSTM2::LoadFile(const std::string& path) {
   }
   if (magic != 0x4D545343) {  // CSTM
     pFile.close();
-    std::cout << "BCSTM [ERROR]: File is invalid!" << std::endl;
-    return false;
+    throw std::runtime_error("BCSTM [ERROR]: File is invalid!");
   }
   pFile.seekg(0x10);
   auto sbc = Read<u16>();
@@ -36,20 +34,18 @@ bool D7::BCSTM2::LoadFile(const std::string& path) {
       data_offset = off;
   }
   if (!info_offset || !data_offset) {
-    std::cout << "BCSTM [ERROR]: Data/Info Section not found" << std::endl;
-    return false;
+    throw std::runtime_error("BCSTM [ERROR]: Data/Info Section not found");
   }
 
   pFile.seekg((info_offset + 0x20));
   if (Read<u8>() != 2) {
-    std::cout << "BCSTM [ERROR]: Unknown Error!" << std::endl;
-    return false;
+    throw std::runtime_error(
+        "BCSTM [ERROR]: Only DSP ADPCM Format is supported!");
   }
   is_looping = Read<u8>();
   channel_count = Read<u8>();
   /*if (channel_count > 2) {
-    std::cout << "BCSTM [ERROR]: File has not 2 channels!" << std::endl;
-    return false;
+    throw std::runtime_error("BCSTM [ERROR]: File has not 2 channels!");
   }*/
   pFile.seekg((info_offset + 0x24));
   sample_rate = Read<u32>();
@@ -69,11 +65,7 @@ bool D7::BCSTM2::LoadFile(const std::string& path) {
   while (Read<u32>() != ChannelInfo) {
     // Find Channel Info
   }
-  std::ofstream off("test.dump.txt");
-  off << pFile.tellg() << std::endl;
   file_advance(Read<u32>() + channel_count * 8 - 12);
-  off << pFile.tellg() << std::endl;
-  off.close();
   // get adpcm data
   for (unsigned int i = 0; i < channel_count; i++) {
     pFile.read(reinterpret_cast<char*>(adpcm_coefs[i]),
@@ -90,10 +82,9 @@ bool D7::BCSTM2::LoadFile(const std::string& path) {
 
   pFile.seekg((data_offset + 0x20));
   is_loaded = true;
-  return true;
 }
 
-void D7::BCSTM2::Update() { this->stream(); }
+void D7::BCSTM2::Stream() { this->stream(); }
 
 void D7::BCSTM2::Play() {
   if (is_paused) {
@@ -194,7 +185,6 @@ void D7::BCSTM2::Stop() {
   active_channels = 0;
   is_paused = false;
   is_looping = false;
-  std::cout << "BCSTM [ERROR]: None";
   is_loaded = false;
   if (!is_streaming) return;
   is_streaming = false;
