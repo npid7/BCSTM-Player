@@ -6,6 +6,7 @@
 #include <pd.hpp>
 #include <pd_ctr_ext.hpp>
 #include <pd_hid_3ds.hpp>
+#include <settings.hpp>
 #include <stagemgr.hpp>
 #include <thread>
 
@@ -39,12 +40,6 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
       PD::Color(.94f - .17f * color_effect, .61f - .25f * color_effect,
                 .36f + .38f * color_effect));
 }
-
-#ifndef __RTTI
-/// IF NO RTTI WE INITIALIZE THIS AS FALSE
-// CAUSE IT GETS REVERSED LATER
-static bool v2 = false;
-#endif
 
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   ctrl->player = new D7::BCSTM2;  // Stable
@@ -88,7 +83,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
 #ifdef __RTTI
         bool v2 = dynamic_cast<D7::BCSTM2*>(ctrl->player);
 #else
-        v2 = !v2;
+        bool v2 = ctrl->player->GetName() == "BCSTMV2";
 #endif
         delete ctrl->player;
         if (v2) {
@@ -104,6 +99,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
 
 FileMgr::Ref Filebrowser;
 Inspector::Ref FileInspector;
+Settings::Ref Settings;
 BCSTM_Ctrl bcstm_ctrl;
 
 void BottomScreenBeta(PD::LI::DrawList::Ref l) {
@@ -152,6 +148,8 @@ int main() {
       FileMgr::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
   FileInspector =
       Inspector::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
+  Settings =
+      Settings::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
   Stage::Goto(Filebrowser);
 
   PD::Timer time;

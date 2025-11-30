@@ -13,4 +13,5 @@
 
 - [tobid7](https://github.com/tobid7): Lead Developer, author of palladium, ctrff
 - [devkitpro](https://github.com/devkitpro): libctru, citro3d
+- [cheuble](https://github.com/cheuble): Source of BCSTMV1 Decoding code (based on freeshop)
 - [3dbrew](https://www.3dbrew.org/wiki/BCSTM): BCSTM Documentation

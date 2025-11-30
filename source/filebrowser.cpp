@@ -134,6 +134,10 @@ void FileMgr::Update() {
         Goto(FileInspector);
       }
     }
+
+    if (Inp->IsDown(Inp->L)) {
+      Goto(Settings);
+    }
   }
 
   pShowHelp = Inp->IsHeld(Inp->Select);

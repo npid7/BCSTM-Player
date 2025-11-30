@@ -58,6 +58,7 @@ add_executable(BCSTM-Player
     source/pd_ctr_ext.cpp
     source/filebrowser.cpp
     source/inspector_view.cpp
+    source/settings.cpp
     source/stagemgr.cpp
     #ource/app.cpp
     #source/config.cpp
@@ -79,6 +80,7 @@ target_compile_definitions(BCSTM-Player PUBLIC
     -DVERSION="${PROJECT_VERSION}"
     -DGIT_COMMIT="${GIT_SHORT_HASH}"
 )
+
 if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
     target_compile_options(BCSTM-Player PUBLIC
         -fno-rtti
