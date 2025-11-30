@@ -133,6 +133,7 @@ Settings::TabEntry::Ref MakeInfo() {
   std::vector<Settings::TabEntry::Ref> pData;
   pData.push_back(Settings::MakeEntry("Version", VERSION));
   pData.push_back(Settings::MakeEntry("Commit", GIT_COMMIT));
+  pData.push_back(Settings::MakeEntry("Banch", GIT_BRANCH));
   pData.push_back(Settings::MakeEntry(
       "C++", std::format("{} ({}-{})", (__cplusplus / 100) % 100,
                          __cplusplus / 100, __cplusplus % 100)));
