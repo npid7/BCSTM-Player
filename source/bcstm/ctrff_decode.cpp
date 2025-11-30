@@ -2,7 +2,7 @@
 #include <cstring> /** std::memset :( */
 
 namespace D7 {
-void CTRFFDec::LoadFile(const std::string& path) {
+void CTRFFDec::LoadFile(const std::string &path) {
   CleanUp();
   pCurrentFile.LoadFile(path);
 
@@ -104,7 +104,7 @@ void CTRFFDec::Stop() {
   if (!pIsStreaming) {
     return;
   }
-  for (unsigned int i = 0; i < pCurrentFile.GetNumChannels(); i++) {
+  for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
     ndspChnWaveBufClear(pChannels[i]);
     pActiveChannels &= ~(1 << pChannels[i]);
   }
@@ -114,6 +114,21 @@ void CTRFFDec::Stop() {
 void CTRFFDec::Stream() {
   pCurrentTime = svcGetSystemTick();
   if (pCurrentTime - pLastTime >= 100000000 && pIsLoaded) {
+    if (pIsEnding) {
+      bool all_done = true;
+      for (PD::u32 buf = 0; buf < BufferCount; buf++) {
+        for (PD::u8 chn = 0; chn < pCurrentFile.GetNumChannels(); chn++) {
+          if (pWaveBuf[chn][buf].status != NDSP_WBUF_DONE) {
+            all_done = false;
+            break;
+          }
+        }
+      }
+      if (all_done) {
+        Stop();
+      }
+      return;
+    }
     if (!pIsStreaming) return;
     if (!pIsPaused) pFillBuffers();
     pLastTime = pCurrentTime;
@@ -123,7 +138,7 @@ void CTRFFDec::Stream() {
 void CTRFFDec::pFillBuffers() {
   for (PD::u32 buf_idx = 0; buf_idx < BufferCount; buf_idx++) {
     bool all_ready = true;
-    for (PD::u32 ch = 0; ch < pCurrentFile.GetNumChannels(); ch++) {
+    for (PD::u8 ch = 0; ch < pCurrentFile.GetNumChannels(); ch++) {
       if (pWaveBuf[ch][buf_idx].status != NDSP_WBUF_DONE) {
         all_ready = false;
         break;
@@ -137,24 +152,25 @@ void CTRFFDec::pFillBuffers() {
       pCurrentFile.ReadGotoBeginning(true);
     } else if (!pCurrentFile.IsLooping() &&
                pCurrentBlock == pCurrentFile.GetLoopEnd()) {
-      this->Stop();
+      pIsEnding = true;
+      return;
     }
 
     for (PD::u8 chn_idx = 0; chn_idx < pCurrentFile.GetNumChannels();
-         ++chn_idx) {
-      ndspWaveBuf* buf = &pWaveBuf[chn_idx][buf_idx];
+         chn_idx++) {
+      ndspWaveBuf *buf = &pWaveBuf[chn_idx][buf_idx];
 
       memset(buf, 0, sizeof(ndspWaveBuf));
       buf->data_adpcm = pBufferData.at(chn_idx).at(buf_idx).Data();
-      pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8*)buf->data_adpcm);
+      pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8 *)buf->data_adpcm);
       DSP_FlushDataCache(buf->data_adpcm, pCurrentFile.GetBlockSize());
 
       if (pCurrentBlock == 0) {
         buf->adpcm_data =
-            (ndspAdpcmData*)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].Context;
+            (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].Context;
       } else if (pCurrentBlock == pCurrentFile.GetLoopStart()) {
         buf->adpcm_data =
-            (ndspAdpcmData*)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].LoopContext;
+            (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].LoopContext;
       }
 
       if (pCurrentBlock == pCurrentFile.GetNumBlocks() - 1) {
@@ -175,6 +191,7 @@ void CTRFFDec::CleanUp() {
   pIsLoaded = false;
   pIsStreaming = false;
   pIsPaused = false;
+  pIsEnding = false;
   pActiveChannels = 0;
   pCurrentBlock = 0;
   pChannels.Clear();

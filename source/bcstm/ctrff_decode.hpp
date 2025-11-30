@@ -14,7 +14,7 @@ class CTRFFDec : public BCSTMPlayerBase {
   };
   ~CTRFFDec() { CleanUp(); }
 
-  void LoadFile(const std::string& path);
+  void LoadFile(const std::string &path);
   void Stream();
 
   void CleanUp();
@@ -53,6 +53,7 @@ class CTRFFDec : public BCSTMPlayerBase {
   bool pIsLoaded = false;
   bool pIsStreaming = false;
   bool pIsPaused = false;
+  bool pIsEnding = false;
 
   PD::u64 pCurrentTime = 0;
   PD::u64 pLastTime = 0;
