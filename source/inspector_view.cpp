@@ -335,7 +335,8 @@ Inspector::TabEntry::Ref MakeDspAdpcmInfo(ctrff::BCSTM::DSP_ADPCM_Info& b,
 }
 
 Inspector::TabEntry::Ref MakeDspAdpcmInfoList(
-    std::vector<ctrff::BCSTM::DSP_ADPCM_Info>& b, const std::string& name = "") {
+    std::vector<ctrff::BCSTM::DSP_ADPCM_Info>& b,
+    const std::string& name = "") {
   auto e = Inspector::TabEntry::New();
   std::vector<Inspector::TabEntry::Ref> Lst;
   for (size_t i = 0; i < b.size(); i++) {
