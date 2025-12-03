@@ -201,11 +201,11 @@ Inspector::TabEntry::Ref MakeSizedRef(ctrff::BCSTM::SizedReference& b,
   return e;
 }
 
-Inspector::TabEntry::Ref MakeRefListVec(PD::Vec<ctrff::BCSTM::Reference>& b,
+Inspector::TabEntry::Ref MakeRefListVec(std::vector<ctrff::BCSTM::Reference>& b,
                                         const std::string& name = "") {
   auto e = Inspector::TabEntry::New();
   std::vector<Inspector::TabEntry::Ref> Lst;
-  for (size_t i = 0; i < b.Size(); i++) {
+  for (size_t i = 0; i < b.size(); i++) {
     Lst.push_back(MakeRef(b[i], "Entry " + std::to_string(i)));
   }
   e->First = "Reference List";
@@ -335,10 +335,10 @@ Inspector::TabEntry::Ref MakeDspAdpcmInfo(ctrff::BCSTM::DSP_ADPCM_Info& b,
 }
 
 Inspector::TabEntry::Ref MakeDspAdpcmInfoList(
-    PD::Vec<ctrff::BCSTM::DSP_ADPCM_Info>& b, const std::string& name = "") {
+    std::vector<ctrff::BCSTM::DSP_ADPCM_Info>& b, const std::string& name = "") {
   auto e = Inspector::TabEntry::New();
   std::vector<Inspector::TabEntry::Ref> Lst;
-  for (size_t i = 0; i < b.Size(); i++) {
+  for (size_t i = 0; i < b.size(); i++) {
     Lst.push_back(MakeDspAdpcmInfo(b[i], "Entry " + std::to_string(i)));
   }
   e->First = "DSP ADPCM Info List";

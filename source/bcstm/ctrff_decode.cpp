@@ -109,6 +109,7 @@ void CTRFFDec::Stop() {
     pActiveChannels &= ~(1 << pChannels[i]);
   }
   pIsStreaming = false;
+  CleanUp();
 }
 
 void CTRFFDec::Stream() {

@@ -1,6 +1,6 @@
 [submodule "ctrff"]
 	path = ctrff
-	url = https://dev.npid7.de/tobid7/ctrff-pub
+	url = https://github.com/tobid7/ctrff
 [submodule "palladium"]
 	path = palladium
 	url = https://dev.npid7.de/tobid7/palladium
