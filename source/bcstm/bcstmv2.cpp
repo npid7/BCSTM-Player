@@ -186,6 +186,7 @@ void D7::BCSTM2::Stop() {
   is_paused = false;
   is_looping = false;
   is_loaded = false;
+  m_is_ending = false;
   if (!is_streaming) return;
   is_streaming = false;
 }
