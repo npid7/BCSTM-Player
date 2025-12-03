@@ -193,6 +193,21 @@ void D7::BCSTM2::Stop() {
 void D7::BCSTM2::stream() {
   current_time = svcGetSystemTick();
   if (current_time - last_time >= 100000000 && is_loaded) {
+    if (m_is_ending) {
+      bool all_done = true;
+      for (PD::u32 buf = 0; buf < buffer_count; buf++) {
+        for (PD::u8 chn = 0; chn < channel_count; chn++) {
+          if (wave_buf[chn][buf].status != NDSP_WBUF_DONE) {
+            all_done = false;
+            break;
+          }
+        }
+      }
+      if (all_done) {
+        Stop();
+      }
+      return;
+    }
     if (!is_streaming) return;
     if (!is_paused) fill_buffers();
     last_time = current_time;
@@ -220,7 +235,8 @@ void D7::BCSTM2::fill_buffers() {
           (data_offset + 0x20 + block_size * channel_count * loop_start));
     }
     if (!is_looping && current_block == loop_end) {
-      this->Stop();
+      m_is_ending = true;
+      return;
     }
 
     for (unsigned int channelIndex = 0; channelIndex < channel_count;

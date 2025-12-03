@@ -103,6 +103,7 @@ class BCSTM2 : public BCSTMPlayerBase {
   bool is_paused = false;
   bool is_looping = false;
   bool is_streaming = false;
+  bool m_is_ending = false;
   bool is_little_endian;
 
   unsigned int channel_count = 0;
