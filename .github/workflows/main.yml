@@ -25,12 +25,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
+
       - name: Set up Git safe directory
         run: git config --global --add safe.directory /__w/BCSTM-Player/BCSTM-Player
+
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install p7zip-full g++ cmake -y
+          sudo apt-get install p7zip-full g++ cmake ninja-build -y
           git clone https://github.com/NPI-D7/bannertool
           cd bannertool
           cmake -B build
@@ -46,46 +48,50 @@ jobs:
       - name: Build
         id: build
         run: |
-          make
+          mkdir -p build
+          cd build
+          cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE="/opt/devkitpro/cmake/3DS.cmake"
+          ninja
+          cd ..
           mkdir -p ~/artifacts
-          cp BCSTM-Player.3dsx ~/artifacts
-          cp BCSTM-Player.cia ~/artifacts
-          echo ::set-output name=commit_tag::$(git describe --abbrev=0 --tags)
-          echo ::set-output name=commit_hash::$(git log --format=%h -1)
-          # Webhook info
-          echo ::set-output name=author_name::$(git log -1 "$GITHUB_SHA" --pretty="%aN")
-          echo ::set-output name=committer_name::$(git log -1 "$GITHUB_SHA" --pretty="%cN")
-          echo ::set-output name=commit_subject::$(git log -1 "$GITHUB_SHA" --pretty="%s")
-          echo ::set-output name=commit_message::$(git log -1 "$GITHUB_SHA" --pretty="%b")
+          cp bin/BCSTM-Player.3dsx ~/artifacts
+          cp bin/BCSTM-Player.cia ~/artifacts
+          cp bin/BCSTM-Player.elf ~/artifacts
+          echo "commit_tag=$(git describe --abbrev=0 --tags)" >> $GITHUB_OUTPUT
+          echo "commit_hash=$(git log --format=%h -1)" >> $GITHUB_OUTPUT
+          echo "author_name=$(git log -1 $GITHUB_SHA --pretty=%aN)" >> $GITHUB_OUTPUT
+          echo "committer_name=$(git log -1 $GITHUB_SHA --pretty=%cN)" >> $GITHUB_OUTPUT
+          echo "commit_subject=$(git log -1 $GITHUB_SHA --pretty=%s)" >> $GITHUB_OUTPUT
+          echo "commit_message=$(git log -1 $GITHUB_SHA --pretty=%b)" >> $GITHUB_OUTPUT
+
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v4
         with:
           path: ~/artifacts/*
           name: build
 
-  # Only run this for non-PR jobs.
   publish_build:
     runs-on: ubuntu-latest
     name: Publish build to NPI-D7/nightlys
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
     needs: build
     env:
-      COMMIT_TAG: ${{ needs.build.outputs.commit_tag }}
-      COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
-      AUTHOR_NAME: ${{ needs.build.outputs.author_name }}
-      COMMIT_MESSAGE: ${{ needs.build.outputs.commit_message }}
+      COMMIT_TAG: ${{ needs.build.commit_tag }}
+      COMMIT_HASH: ${{ needs.build.commit_hash }}
+      AUTHOR_NAME: ${{ needs.build.author_name }}
+      COMMIT_MESSAGE: ${{ needs.build.commit_message }}
     outputs:
       current_date: ${{ steps.commit.outputs.current_date }}
     steps:
       - name: Install tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install qrencode -y
+        run: sudo apt-get update && sudo apt-get install qrencode -y
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: build
           path: build
+
       - name: Upload to ${{ github.repository }} release
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         run: |
@@ -97,13 +103,14 @@ jobs:
             UPLOAD_URL="https://uploads.github.com/repos/${{ github.repository }}/releases/$ID/assets?name=$(basename $file)"
             curl -XPOST -H "$AUTH_HEADER" -H "$CONTENT_LENGTH" -H "$CONTENT_TYPE" --upload-file "$file" "$UPLOAD_URL"
           done
+
       - name: Commit and push to NPI-D7/nightlys
         id: commit
         run: |
           CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
-          echo ::set-output name=current_date::$CURRENT_DATE
+          echo "current_date=$CURRENT_DATE" >> $GITHUB_OUTPUT
           git config --global user.email "tobid7@outlook.de"
-          git config --global user.name "Tobi-D7"
+          git config --global user.name "tobid7"
           git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/NPI-D7/nightlys.git
           cd nightlys
           mkdir -p builds/BCSTM-Player/
@@ -111,10 +118,11 @@ jobs:
           qrencode -o BCSTM-Player.png https://github.com/NPI-D7/nightlys/raw/v$CURRENT_DATE/builds/BCSTM-Player/BCSTM-Player.cia
           qrencode -o BCSTM-Player-release.png https://github.com/NPI-D7/nightlys/releases/download/$COMMIT_TAG/BCSTM-Player.cia
           cp ${{ github.workspace }}/build/* .
-          git stage .
+          git add .
           git commit -m "BCSTM-Player | $COMMIT_HASH"
           git tag v$CURRENT_DATE
           git push origin master v$CURRENT_DATE
+
       - name: Release to idk
         run: |
           ls ${{ github.workspace }}/build

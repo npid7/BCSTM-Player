@@ -2,3 +2,4 @@ build
 BCSTM-Player.*
 icon.bin
 banner.bin
+compile_commands.json

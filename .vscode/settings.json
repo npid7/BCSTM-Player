@@ -1,5 +1,5 @@
 {
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "files.associations": {
         "*.tcc": "cpp",
         "cctype": "cpp",
@@ -98,6 +98,7 @@
         "xlocmes": "cpp",
         "xlocmon": "cpp",
         "xloctime": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "any": "cpp"
     }
 }

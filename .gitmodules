@@ -1,6 +1,6 @@
-[submodule "D7-Menu-Core"]
-	path = D7-Menu-Core
-	url = https://github.com/NPI-D7/D7-Menu-Core.git
+[submodule "ctrff"]
+	path = ctrff
+	url = https://github.com/tobid7/ctrff
 [submodule "palladium"]
 	path = palladium
-	url = https://github.com/tobid7/palladium
+	url = https://dev.npid7.de/tobid7/palladium
