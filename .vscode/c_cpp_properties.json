@@ -1,12 +1,22 @@
 {
     "configurations": [
         {
-            "name": "3DS",
+            "name": "3DS | Windows",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/palladium/include/**",
                 "C:/devkitpro/libctru/include/**",
                 "C:/devkitpro/portlibs/3ds/include/**",
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        },
+        {
+            "name": "3DS | Linux/Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/palladium/include/**",
                 "/opt/devkitpro/libctru/include/**",
                 "/opt/devkitpro/portlibs/3ds/include/**"
             ],
