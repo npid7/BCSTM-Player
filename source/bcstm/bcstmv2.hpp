@@ -11,7 +11,7 @@
 namespace D7 {
 class BCSTM2 : public BCSTMPlayerBase {
  public:
-  BCSTM2() : BCSTMPlayerBase("BCSTMV2", FormatBCSTM | AllChannels) {}
+  BCSTM2() : BCSTMPlayerBase("BCSTMV2 (Lagacy)", Default) {}
   ~BCSTM2() { Stop(); }
 
   template <typename T>

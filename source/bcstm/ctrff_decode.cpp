@@ -5,6 +5,10 @@ namespace D7 {
 void CTRFFDec::LoadFile(const std::string &path) {
   CleanUp();
   pCurrentFile.LoadFile(path);
+  if (pCurrentFile.pInfoBlock.StreamInfo.Encoding == ctrff::BCSTM::IMA_ADPCM) {
+    throw std::runtime_error(
+        "[CTRFFDEC]: Format IMA ADPCM is not supported by ndsp!");
+  }
 
   /** Resize the Player Internal Data holders */
   /** Using this allows to not have to much memory allocated */
@@ -31,13 +35,15 @@ void CTRFFDec::Play() {
   }
   // Gather Encoding and create ndsp config (default is the old adpcm only cfg)
   auto encoding = pCurrentFile.pInfoBlock.StreamInfo.Encoding;
-  int ndspCfg = NDSP_FORMAT_ADPCM | NDSP_3D_SURROUND_PREPROCESSED;
+  int ndspCfg = NDSP_3D_SURROUND_PREPROCESSED;
 
   // Setup PCM Format with Channel Num
   if (encoding == ctrff::BCSTM::PCM8) {
-    ndspCfg = NDSP_FORMAT_PCM8 | NDSP_CHANNELS(pCurrentFile.GetNumChannels());
+    ndspCfg |= NDSP_FORMAT_PCM8;
   } else if (encoding == ctrff::BCSTM::PCM16) {
-    ndspCfg = NDSP_FORMAT_PCM16 | NDSP_CHANNELS(pCurrentFile.GetNumChannels());
+    ndspCfg |= NDSP_FORMAT_PCM16;
+  } else if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+    ndspCfg |= NDSP_FORMAT_ADPCM;
   }
 
   for (PD::u32 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
@@ -207,7 +213,6 @@ void CTRFFDec::pFillBuffers() {
 }
 
 void CTRFFDec::CleanUp() {
-  Stop();
   pCurrentFile.CleanUp();
   pIsLoaded = false;
   pIsStreaming = false;

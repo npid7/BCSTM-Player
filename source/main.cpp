@@ -8,6 +8,7 @@
 #include <pd_hid_3ds.hpp>
 #include <settings.hpp>
 #include <stagemgr.hpp>
+#include <stages.hpp>
 #include <thread>
 
 /**
@@ -42,7 +43,7 @@ void Append(PD::LI::DrawList::Ref l, int index, fvec2 position, fvec2 size,
 }
 
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
-  ctrl->player = new D7::BCSTM2;  // Stable
+  ctrl->player = new D7::CTRFFDec;  // Stable
   while (true) {
     if (ctrl->pFileLoaded) {
       ctrl->player->Stream();
@@ -80,11 +81,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
         break; /** Break the loop */
       } else if (t.req == BCSTM_Ctrl::SwitchDec) {
         ctrl->player->Stop();
-#ifdef __RTTI
-        bool v2 = dynamic_cast<D7::BCSTM2*>(ctrl->player);
-#else
-        bool v2 = ctrl->player->GetName() == "BCSTMV2";
-#endif
+        bool v2 = ctrl->player->GetName() == "BCSTMV2 (Lagacy)";
         delete ctrl->player;
         if (v2) {
           ctrl->player = new D7::CTRFFDec();
@@ -99,6 +96,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
 
 FileMgr::Ref Filebrowser;
 Inspector::Ref FileInspector;
+InspectorBCWAV::Ref FileInspectorBCWAV;
 Settings::Ref Settings;
 BCSTM_Ctrl bcstm_ctrl;
 
@@ -148,6 +146,8 @@ int main() {
       FileMgr::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
   FileInspector =
       Inspector::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
+  FileInspectorBCWAV = InspectorBCWAV::New(PD::Ctr::GetContext().Inp,
+                                           PD::Ctr::GetWhiteTex(), font);
   Settings =
       Settings::New(PD::Ctr::GetContext().Inp, PD::Ctr::GetWhiteTex(), font);
   Stage::Goto(Filebrowser);
@@ -156,10 +156,6 @@ int main() {
   while (PD::Ctr::ContextUpdate()) {
     time.Update();
     rl2->SetFont(font);
-
-    if (PD::Ctr::GetContext().Inp->IsUp(PD::Hid::Y)) {
-      bcstm_ctrl.DoRequest(BCSTM_Ctrl::SwitchDec);
-    }
 
     rl2->DrawRectFilled(fvec2(0, 0), fvec2(400, 240), 0xff64c9fd);
     for (int i = 0; i < 44; i++)

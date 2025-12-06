@@ -132,10 +132,14 @@ void FileMgr::Update() {
       if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
         FileInspector->ReadFile(FSE.Path);
         Goto(FileInspector);
+      } else if (FSE.Name.find(".bcwav") != FSE.Name.npos) {
+        FileInspectorBCWAV->ReadFile(FSE.Path);
+        Goto(FileInspectorBCWAV);
       }
     }
 
-    if (Inp->IsDown(Inp->L)) {
+    if (Inp->IsDown(Inp->Y)) {
+      Settings->Init();
       Goto(Settings);
     }
   }

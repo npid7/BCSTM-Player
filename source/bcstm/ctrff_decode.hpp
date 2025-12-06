@@ -9,7 +9,8 @@
 namespace D7 {
 class CTRFFDec : public BCSTMPlayerBase {
  public:
-  CTRFFDec() : BCSTMPlayerBase("CTRFF (WIP)", FormatBCSTM | AllChannels) {
+  CTRFFDec()
+      : BCSTMPlayerBase("CTRFFDec", FormatBCSTM | AllChannels | AllEncodings) {
     CleanUp();
   };
   ~CTRFFDec() { CleanUp(); }
