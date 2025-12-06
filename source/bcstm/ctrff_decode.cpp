@@ -5,6 +5,10 @@ namespace D7 {
 void CTRFFDec::LoadFile(const std::string &path) {
   CleanUp();
   pCurrentFile.LoadFile(path);
+  if (pCurrentFile.pInfoBlock.StreamInfo.Encoding == ctrff::BCSTM::IMA_ADPCM) {
+    throw std::runtime_error(
+        "[CTRFFDEC]: Format IMA ADPCM is not supported by ndsp!");
+  }
 
   /** Resize the Player Internal Data holders */
   /** Using this allows to not have to much memory allocated */
@@ -29,6 +33,19 @@ void CTRFFDec::Play() {
   if (pIsStreaming) {
     return;
   }
+  // Gather Encoding and create ndsp config (default is the old adpcm only cfg)
+  auto encoding = pCurrentFile.pInfoBlock.StreamInfo.Encoding;
+  int ndspCfg = NDSP_3D_SURROUND_PREPROCESSED;
+
+  // Setup PCM Format with Channel Num
+  if (encoding == ctrff::BCSTM::PCM8) {
+    ndspCfg |= NDSP_FORMAT_PCM8;
+  } else if (encoding == ctrff::BCSTM::PCM16) {
+    ndspCfg |= NDSP_FORMAT_PCM16;
+  } else if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+    ndspCfg |= NDSP_FORMAT_ADPCM;
+  }
+
   for (PD::u32 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
     {
       pChannels[i] = 0;
@@ -43,8 +60,7 @@ void CTRFFDec::Play() {
       ndspChnWaveBufClear(pChannels[i]);
     }
     static float mix[12];
-    ndspChnSetFormat(pChannels[i],
-                     NDSP_FORMAT_ADPCM | NDSP_3D_SURROUND_PREPROCESSED);
+    ndspChnSetFormat(pChannels[i], ndspCfg);
     ndspChnSetRate(pChannels[i], pCurrentFile.GetSampleRate());
 
     /** Make sure they are 0 */
@@ -78,8 +94,10 @@ void CTRFFDec::Play() {
     }
 
     ndspChnSetMix(pChannels[i], mix);
-    ndspChnSetAdpcmCoefs(pChannels[i],
-                         pCurrentFile.pDSP_ADPCM_Info[i].Param.Coefficients);
+    if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+      ndspChnSetAdpcmCoefs(pChannels[i],
+                           pCurrentFile.pDSP_ADPCM_Info[i].Param.Coefficients);
+    }
     for (int j = 0; j < BufferCount; j++) {
       /** still Prefer fill_n over memset */
       std::memset(&pWaveBuf[i][j], 0, sizeof(ndspWaveBuf));
@@ -137,6 +155,7 @@ void CTRFFDec::Stream() {
 }
 
 void CTRFFDec::pFillBuffers() {
+  auto encoding = pCurrentFile.pInfoBlock.StreamInfo.Encoding;
   for (PD::u32 buf_idx = 0; buf_idx < BufferCount; buf_idx++) {
     bool all_ready = true;
     for (PD::u8 ch = 0; ch < pCurrentFile.GetNumChannels(); ch++) {
@@ -160,18 +179,25 @@ void CTRFFDec::pFillBuffers() {
     for (PD::u8 chn_idx = 0; chn_idx < pCurrentFile.GetNumChannels();
          chn_idx++) {
       ndspWaveBuf *buf = &pWaveBuf[chn_idx][buf_idx];
-
       memset(buf, 0, sizeof(ndspWaveBuf));
-      buf->data_adpcm = pBufferData.at(chn_idx).at(buf_idx).Data();
-      pCurrentFile.ReadBlock(pCurrentBlock, (PD::u8 *)buf->data_adpcm);
-      DSP_FlushDataCache(buf->data_adpcm, pCurrentFile.GetBlockSize());
 
-      if (pCurrentBlock == 0) {
-        buf->adpcm_data =
-            (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].Context;
-      } else if (pCurrentBlock == pCurrentFile.GetLoopStart()) {
-        buf->adpcm_data =
-            (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].LoopContext;
+      PD::u8 *data = pBufferData[chn_idx][buf_idx].Data();
+      pCurrentFile.ReadBlock(pCurrentBlock, data);
+      DSP_FlushDataCache(data, pCurrentFile.GetBlockSize());
+
+      if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+        buf->data_adpcm = data;
+        if (pCurrentBlock == 0) {
+          buf->adpcm_data =
+              (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx].Context;
+        } else if (pCurrentBlock == pCurrentFile.GetLoopStart()) {
+          buf->adpcm_data =
+              (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx]
+                  .LoopContext;
+        }
+      } else if (encoding == ctrff::BCSTM::PCM8 ||
+                 encoding == ctrff::BCSTM::PCM16) {
+        buf->data_vaddr = data;
       }
 
       if (pCurrentBlock == pCurrentFile.GetNumBlocks() - 1) {
@@ -187,7 +213,6 @@ void CTRFFDec::pFillBuffers() {
 }
 
 void CTRFFDec::CleanUp() {
-  Stop();
   pCurrentFile.CleanUp();
   pIsLoaded = false;
   pIsStreaming = false;

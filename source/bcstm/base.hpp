@@ -21,8 +21,11 @@ class BCSTMPlayerBase {
         SingleChannel | DualChannel | QuadraChannel | HexaChannel | OktaChannel,
     NonLoopEnd = 1 << 5,
     FormatBCSTM = 1 << 6,
-    Default =
-        FormatBCSTM | SingleChannel | DualChannel,  // all support these iirc
+    EncodingPCM8 = 1 << 7,
+    EncodingPCM16 = 1 << 8,
+    EncodingADPCM = 1 << 9,
+    AllEncodings = EncodingADPCM | EncodingPCM16 | EncodingPCM8,
+    Default = FormatBCSTM | AllChannels | EncodingADPCM,  // supported by all
   };
   BCSTMPlayerBase() = default;
   BCSTMPlayerBase(const std::string& n, Features f) : pName(n), pFeatures(f) {}

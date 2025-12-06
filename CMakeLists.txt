@@ -65,6 +65,7 @@ add_executable(BCSTM-Player
     source/pd_ctr_ext.cpp
     source/filebrowser.cpp
     source/inspector_view.cpp
+    source/inspector_view_bcwav.cpp
     source/settings.cpp
     source/stagemgr.cpp
     #ource/app.cpp
