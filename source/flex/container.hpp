@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pd.hpp>
+#include <palladium>
 
 namespace PD {
 namespace Flex {
@@ -8,9 +8,9 @@ class Container {
  public:
   Container() {}
   ~Container() = default;
-  PD_SMART_CTOR(Container)
+  PD_SHARED(Container)
 
-  virtual void Draw(PD::LI::DrawList::Ref l) const {}
+  virtual void Draw(PD::Li::DrawList::Ref l) const {}
 };
 }  // namespace Flex
 }  // namespace PD

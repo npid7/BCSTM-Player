@@ -1,5 +1,6 @@
 #pragma once
 
+#include <colors.hpp>
 #include <flex/container.hpp>
 
 /** Header Containing Simple Objects */
@@ -15,7 +16,7 @@ class Rect : public Container {
     pColor = clr;
   }
   ~Rect() = default;
-  PD_SMART_CTOR(Rect)
+  PD_SHARED(Rect)
 
   Rect& SetPos(fvec2 p) {
     pPos = p;
@@ -34,7 +35,7 @@ class Rect : public Container {
   fvec2 GetSize() const { return pSize; }
   u32 GetColor() const { return pColor; }
 
-  void Draw(PD::LI::DrawList::Ref l) const override;
+  void Draw(PD::Li::DrawList::Ref l) const override;
 
   fvec2 pPos;
   fvec2 pSize;
@@ -45,7 +46,7 @@ class Triangle : public Container {
  public:
   Triangle() {}
   ~Triangle() = default;
-  PD_SMART_CTOR(Triangle)
+  PD_SHARED(Triangle)
 
   Triangle& SetPosA(fvec2 p) {
     pPosA = p;
@@ -69,7 +70,7 @@ class Triangle : public Container {
   fvec2 GetPosC() const { return pPosC; }
   u32 GetColor() const { return pColor; }
 
-  void Draw(PD::LI::DrawList::Ref l) const override;
+  void Draw(PD::Li::DrawList::Ref l) const override;
 
   fvec2 pPosA;
   fvec2 pPosB;
@@ -81,9 +82,9 @@ class Button : public Container {
  public:
   Button() {}
   ~Button() {}
-  PD_SMART_CTOR(Button)
+  PD_SHARED(Button)
 
-  void Draw(PD::LI::DrawList::Ref l) const override;
+  void Draw(PD::Li::DrawList::Ref l) const override;
 
   Button& OnPress(std::function<void()> f) {
     pOnPress = f;
@@ -99,7 +100,7 @@ class Text : public Container {
  public:
   Text() {}
   ~Text() = default;
-  PD_SMART_CTOR(Text)
+  PD_SHARED(Text)
 
   Text& SetPos(fvec2 p) {
     pPos = p;
@@ -123,7 +124,7 @@ class Text : public Container {
   u32 GetColor() const { return pColor; }
   const std::string& GetText() const { return pText; }
 
-  void Draw(PD::LI::DrawList::Ref l) const override;
+  void Draw(PD::Li::DrawList::Ref l) const override;
 
   std::string pText;
   fvec2 pPos;
@@ -135,7 +136,7 @@ class Image : public Container {
  public:
   Image() {}
   ~Image() = default;
-  PD_SMART_CTOR(Image)
+  PD_SHARED(Image)
 
   Image& SetPos(fvec2 p) {
     pPos = p;
@@ -149,18 +150,18 @@ class Image : public Container {
     pColor = c;
     return *this;
   }
-  Image& SetImage(PD::LI::Texture::Ref t) {
+  Image& SetImage(PD::Li::Texture::Ref t) {
     pTex = t;
     return *this;
   }
   fvec2 GetPos() const { return pPos; }
   fvec2 GetSize() const { return pSize; }
   u32 GetColor() const { return pColor; }
-  PD::LI::Texture::Ref GetImage() const { return pTex; }
+  PD::Li::Texture::Ref GetImage() const { return pTex; }
 
-  void Draw(PD::LI::DrawList::Ref l) const override;
+  void Draw(PD::Li::DrawList::Ref l) const override;
 
-  PD::LI::Texture::Ref pTex;
+  PD::Li::Texture::Ref pTex;
   fvec2 pPos;
   fvec2 pSize = fvec2(-1.f, -1.f);
   u32 pColor = 0xffffffff;

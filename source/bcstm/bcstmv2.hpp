@@ -5,8 +5,8 @@
 #include <bcstm/base.hpp>
 #include <cstring>
 #include <fstream>
-#include <li_backend_c3d.hpp>
-#include <pd.hpp>
+#include <palladium>
+#include <pd-3ds/bknd-gfx.hpp>
 
 namespace D7 {
 class BCSTM2 : public BCSTMPlayerBase {

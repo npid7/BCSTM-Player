@@ -8,40 +8,40 @@ void InspectorBCWAV::Update() {
 
   for (int i = 0; i < 12; i++) {
     Top->Rect()
-        .SetPos(fvec2(0, 18 + 17 * i))
-        .SetSize(fvec2(200, 17))
+        .SetPos(PD::fvec2(0, 18 + 17 * i))
+        .SetSize(PD::fvec2(200, 17))
         .SetColor(((i % 2) == 0) ? PD::Color("#222222aa")
                                  : PD::Color("#333333aa"));
     Top->Rect()
-        .SetPos(fvec2(200, 18 + 17 * i))
-        .SetSize(fvec2(200, 17))
+        .SetPos(PD::fvec2(200, 18 + 17 * i))
+        .SetSize(PD::fvec2(200, 17))
         .SetColor(((i % 2) != 0) ? PD::Color("#222222aa")
                                  : PD::Color("#333333aa"));
   }
   Top->Rect()
       .SetPos(cursor)
-      .SetSize(fvec2(400, 17))
+      .SetSize(PD::fvec2(400, 17))
       .SetColor(PD::Color("#222222cc"));
   for (int i = 0; i < int(pDL.size() > 12 ? 12 : pDL.size()); i++) {
     Top->Text(pDL.at(sp + i)->First)
-        .SetPos(fvec2(5, 18 + 17 * i))
-        .SetColor(PD::Colors::White);
+        .SetPos(PD::fvec2(5, 18 + 17 * i))
+        .SetColor(White);
     Top->Text(pDL.at(sp + i)->Second)
-        .SetPos(fvec2(205, 18 + 17 * i))
-        .SetColor(PD::Colors::White);
+        .SetPos(PD::fvec2(205, 18 + 17 * i))
+        .SetColor(White);
   }
-  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(fvec2(400, 18));
+  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
   Top->Text("BCSTM-Player -> File Inspector")
-      .SetPos(fvec2(5, 1))
-      .SetColor(PD::Colors::White);
+      .SetPos(PD::fvec2(5, 1))
+      .SetColor(White);
   Top->Rect()
-      .SetPos(fvec2(0, 222))
-      .SetSize(fvec2(400, 18))
+      .SetPos(PD::fvec2(0, 222))
+      .SetSize(PD::fvec2(400, 18))
       .SetColor(DesignerHeader);
   /** Only use Filename due to no space */
   Top->Text(std::filesystem::path(pPath).filename().string())
-      .SetPos(fvec2(5, 223))
-      .SetColor(PD::Colors::White);
+      .SetPos(PD::fvec2(5, 223))
+      .SetColor(White);
   if (pDL.size() > 12) {
     float rect_h = (12.f / (float)pDL.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -49,19 +49,21 @@ void InspectorBCWAV::Update() {
     float rect_pos =
         18.f + ((float)sp / (float)(pDL.size() - 12)) * (204.f - rect_h);
     Top->Rect()
-        .SetPos(fvec2(396, rect_pos))
-        .SetSize(fvec2(4, rect_h))
-        .SetColor(PD::Colors::DarkGray);
+        .SetPos(PD::fvec2(396, rect_pos))
+        .SetSize(PD::fvec2(4, rect_h))
+        .SetColor(DarkGray);
   }
 
-  if (Inp->IsUp(Inp->Down) && sp + cursor.pIndex < (int)pDL.size() - 1) {
+  if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
+      sp + cursor.pIndex < (int)pDL.size() - 1) {
     if (cursor.pIndex == 11) {
       sp++;
     } else {
       cursor++;
     }
   }
-  if (Inp->IsUp(Inp->Right) && sp + cursor.pIndex + 5 < (int)pDL.size()) {
+  if (PD::Hid::IsUp(PD::Hid::Key::Right) &&
+      sp + cursor.pIndex + 5 < (int)pDL.size()) {
     if (cursor.pIndex == 11) {
       sp += 5;
     } else {
@@ -73,14 +75,14 @@ void InspectorBCWAV::Update() {
       }
     }
   }
-  if (Inp->IsUp(Inp->Up) && cursor.pIndex + sp > 0) {
+  if (PD::Hid::IsUp(PD::Hid::Key::Up) && cursor.pIndex + sp > 0) {
     if (cursor.pIndex == 0) {
       sp--;
     } else {
       cursor--;
     }
   }
-  if (Inp->IsUp(Inp->Left) && sp + cursor.pIndex - 5 >= 0) {
+  if (PD::Hid::IsUp(PD::Hid::Key::Left) && sp + cursor.pIndex - 5 >= 0) {
     if (cursor.pIndex == 0) {
       sp -= 5;
     } else {
@@ -93,7 +95,7 @@ void InspectorBCWAV::Update() {
     }
   }
 
-  if (Inp->IsDown(Inp->A)) {
+  if (PD::Hid::IsDown(PD::Hid::Key::A)) {
     auto FSE = pDL.at(cursor.pIndex + sp);
     if (FSE->SubData.size() != 0) {
       pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
@@ -104,7 +106,7 @@ void InspectorBCWAV::Update() {
     }
   }
 
-  if (Inp->IsDown(Inp->B)) {
+  if (PD::Hid::IsDown(PD::Hid::Key::B)) {
     if (!pLastPos.IsEmpty()) {
       sp = pLastPos.Top().First;
       cursor.SetIndex(pLastPos.Top().Second);

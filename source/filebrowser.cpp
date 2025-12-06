@@ -9,8 +9,8 @@ void FileMgr::Update() {
 
   for (int i = 0; i < 12; i++) {
     Top->Rect()
-        .SetPos(fvec2(0, 18 + 17 * i))
-        .SetSize(fvec2(400, 17))
+        .SetPos(PD::fvec2(0, 18 + 17 * i))
+        .SetSize(PD::fvec2(400, 17))
         .SetColor(((i % 2) == 0) ? PD::Color("#222222aa")
                                  : PD::Color("#333333aa"));
   }
@@ -22,28 +22,28 @@ void FileMgr::Update() {
            "Play "
            "BCSTM File\nB -> Go Back\nX -> Open .bcstm File in File "
            "Inspector\nStart -> Exit App")
-        .SetPos(fvec2(5, 18))
-        .SetColor(PD::Colors::White);
+        .SetPos(PD::fvec2(5, 18))
+        .SetColor(White);
   } else {
     Top->Rect()
         .SetPos(cursor)
-        .SetSize(fvec2(400, 17))
+        .SetSize(PD::fvec2(400, 17))
         .SetColor(PD::Color("#222222cc"));
     for (int i = 0; i < int(list.size() > 12 ? 12 : list.size()); i++) {
       Top->Text(list[sp + i].Name)
-          .SetPos(fvec2(5, 18 + 17 * i))
-          .SetColor(PD::Colors::White);
+          .SetPos(PD::fvec2(5, 18 + 17 * i))
+          .SetColor(White);
     }
   }
-  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(fvec2(400, 18));
+  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
   Top->Text("BCSTM-Player -> Filebrowser")
-      .SetPos(fvec2(5, 1))
-      .SetColor(PD::Colors::White);
+      .SetPos(PD::fvec2(5, 1))
+      .SetColor(White);
   Top->Rect()
-      .SetPos(fvec2(0, 222))
-      .SetSize(fvec2(400, 18))
+      .SetPos(PD::fvec2(0, 222))
+      .SetSize(PD::fvec2(400, 18))
       .SetColor(DesignerHeader);
-  Top->Text(cPath).SetPos(fvec2(5, 223)).SetColor(PD::Colors::White);
+  Top->Text(cPath).SetPos(PD::fvec2(5, 223)).SetColor(White);
   if (list.size() > 12) {
     float rect_h = (12.f / (float)list.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -51,19 +51,21 @@ void FileMgr::Update() {
     float rect_pos =
         18.f + ((float)sp / (float)(list.size() - 12)) * (204.f - rect_h);
     Top->Rect()
-        .SetPos(fvec2(396, rect_pos))
-        .SetSize(fvec2(4, rect_h))
-        .SetColor(PD::Colors::DarkGray);
+        .SetPos(PD::fvec2(396, rect_pos))
+        .SetSize(PD::fvec2(4, rect_h))
+        .SetColor(DarkGray);
   }
   if (!pShowHelp) {
-    if (Inp->IsUp(Inp->Down) && sp + cursor.pIndex < (int)list.size() - 1) {
+    if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
+        sp + cursor.pIndex < (int)list.size() - 1) {
       if (cursor.pIndex == 11) {
         sp++;
       } else {
         cursor++;
       }
     }
-    if (Inp->IsUp(Inp->Right) && sp + cursor.pIndex + 5 < (int)list.size()) {
+    if (PD::Hid::IsUp(PD::Hid::Key::Right) &&
+        sp + cursor.pIndex + 5 < (int)list.size()) {
       if (cursor.pIndex == 11) {
         sp += 5;
       } else {
@@ -75,14 +77,14 @@ void FileMgr::Update() {
         }
       }
     }
-    if (Inp->IsUp(Inp->Up) && cursor.pIndex + sp > 0) {
+    if (PD::Hid::IsUp(PD::Hid::Key::Up) && cursor.pIndex + sp > 0) {
       if (cursor.pIndex == 0) {
         sp--;
       } else {
         cursor--;
       }
     }
-    if (Inp->IsUp(Inp->Left) && sp + cursor.pIndex - 5 >= 0) {
+    if (PD::Hid::IsUp(PD::Hid::Key::Left) && sp + cursor.pIndex - 5 >= 0) {
       if (cursor.pIndex == 0) {
         sp -= 5;
       } else {
@@ -95,7 +97,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (Inp->IsDown(Inp->A)) {
+    if (PD::Hid::IsDown(PD::Hid::Key::A)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Dir) {
         pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
@@ -109,7 +111,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (Inp->IsDown(Inp->B)) {
+    if (PD::Hid::IsDown(PD::Hid::Key::B)) {
       if (cPath != "sdmc:/") {
         cPath = std::filesystem::path(cPath).parent_path().string();
         if (cPath == "sdmc:") {
@@ -127,7 +129,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (Inp->IsDown(Inp->X)) {
+    if (PD::Hid::IsDown(PD::Hid::Key::X)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
         FileInspector->ReadFile(FSE.Path);
@@ -138,13 +140,13 @@ void FileMgr::Update() {
       }
     }
 
-    if (Inp->IsDown(Inp->Y)) {
+    if (PD::Hid::IsDown(PD::Hid::Key::Y)) {
       Settings->Init();
       Goto(Settings);
     }
   }
 
-  pShowHelp = Inp->IsHeld(Inp->Select);
+  pShowHelp = PD::Hid::IsHeld(PD::Hid::Key::Select);
 }
 
 void FileMgr::SortList(std::vector<FSEntry>& l) {

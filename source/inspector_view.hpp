@@ -1,18 +1,17 @@
 #pragma once
 
 #include <cursor.hpp>
-#include <pd.hpp>
+#include <palladium>
 #include <stagemgr.hpp>
 #include <thread>
 
 class Inspector : public Stage {
  public:
-  Inspector(PD::Hid::Ref inp, PD::LI::Texture::Ref wp, PD::LI::Font::Ref f)
-      : Stage(inp, wp, f) {}
+  Inspector(PD::Li::Font::Ref f) : Stage(f) {}
   ~Inspector() = default;
-  PD_SMART_CTOR(Inspector)
+  PD_SHARED(Inspector)
 
-  Cursor cursor = Cursor(fvec2(0.f, 18.f), 17.f);
+  Cursor cursor = Cursor(PD::fvec2(0.f, 18.f), 17.f);
   int sp = 0;
   PD::Timer delta;
 
@@ -22,7 +21,7 @@ class Inspector : public Stage {
 
   struct TabEntry {
     TabEntry() {}
-    PD_SMART_CTOR(TabEntry);
+    PD_SHARED(TabEntry);
 
     std::string First;
     std::string Second;

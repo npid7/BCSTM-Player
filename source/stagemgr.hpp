@@ -1,21 +1,19 @@
 #pragma once
 
 #include <flex/flex.hpp>
-#include <pd.hpp>
+#include <palladium>
 
 class Stage {
  public:
-  Stage(PD::Hid::Ref inp, PD::LI::Texture::Ref wp, PD::LI::Font::Ref f) {
-    Top = PD::Flex::Context::New(wp, f, inp);
-    Bottom = PD::Flex::Context::New(wp, f, inp);
-    Inp = inp;
+  Stage(PD::Li::Font::Ref f) {
+    Top = PD::Flex::Context::New(f);
+    Bottom = PD::Flex::Context::New(f);
   }
   virtual ~Stage() {}
-  PD_SMART_CTOR(Stage);
+  PD_SHARED(Stage);
 
   PD::Flex::Context::Ref Top;
   PD::Flex::Context::Ref Bottom;
-  PD::Hid::Ref Inp;
 
   virtual void Update() {}
 
@@ -28,10 +26,10 @@ class Stage {
     pStages.Top()->Top->Update();
     pStages.Top()->Bottom->Update();
   };
-  static PD::LI::DrawList::Ref GetDrawDataTop() {
+  static PD::Li::DrawList::Ref GetDrawDataTop() {
     return pStages.Top()->Top->pDrawList;
   }
-  static PD::LI::DrawList::Ref GetDrawDataBottom() {
+  static PD::Li::DrawList::Ref GetDrawDataBottom() {
     return pStages.Top()->Bottom->pDrawList;
   }
 

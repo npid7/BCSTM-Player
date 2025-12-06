@@ -1,23 +1,20 @@
 #pragma once
 
 #include <cursor.hpp>
-#include <pd.hpp>
+#include <palladium>
 #include <stagemgr.hpp>
 #include <thread>
 
 class Settings : public Stage {
  public:
-  Settings(PD::Hid::Ref inp, PD::LI::Texture::Ref wp, PD::LI::Font::Ref f)
-      : Stage(inp, wp, f) {
-    Init();
-  }
+  Settings(PD::Li::Font::Ref f) : Stage(f) { Init(); }
   ~Settings() = default;
-  PD_SMART_CTOR(Settings);
+  PD_SHARED(Settings);
 
   void Update() override;
   void Init();
 
-  Cursor cursor = Cursor(fvec2(0.f, 18.f), 17.f);
+  Cursor cursor = Cursor(PD::fvec2(0.f, 18.f), 17.f);
   int sp = 0;
   PD::Timer delta;
   struct TabEntry {
@@ -32,7 +29,7 @@ class Settings : public Stage {
       Second = s;
       pFunc = fu;
     }
-    PD_SMART_CTOR(TabEntry);
+    PD_SHARED(TabEntry);
 
     std::string First;
     std::string Second;

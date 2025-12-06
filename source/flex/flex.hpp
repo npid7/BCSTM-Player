@@ -1,7 +1,7 @@
 #pragma once
 #include <flex/container.hpp>
 #include <flex/objects.hpp>
-#include <pd.hpp>
+#include <palladium>
 
 /** Another UI Library (worst one ive created) */
 
@@ -9,17 +9,15 @@ namespace PD {
 namespace Flex {
 class Context {
  public:
-  Context(PD::LI::Texture::Ref white, PD::LI::Font::Ref font,
-          PD::Hid::Ref inp) {
-    pDrawList = PD::LI::DrawList::New(white);
+  Context(PD::Li::Font::Ref font) {
+    pDrawList = PD::Li::DrawList::New();
     pFont = font;
-    pInp = inp;
     pDrawList->SetFont(pFont);
   }
   ~Context() {}
-  PD_SMART_CTOR(Context)
+  PD_SHARED(Context)
 
-  void DirectAccessDraw(std::function<void(PD::LI::DrawList::Ref)> f) {
+  void DirectAccessDraw(std::function<void(PD::Li::DrawList::Ref)> f) {
     if (f) {
       f(pDrawList);
     }
@@ -49,7 +47,7 @@ class Context {
     return *(o.get());
   }
 
-  Flex::Image& Image(PD::LI::Texture::Ref tex = nullptr) {
+  Flex::Image& Image(PD::Li::Texture::Ref tex = nullptr) {
     auto o = Image::New();
     pObjects.Add(o);
     return o->SetImage(tex);
@@ -68,9 +66,8 @@ class Context {
     pObjects.Clear();
   }
 
-  PD::LI::DrawList::Ref pDrawList;
-  PD::Hid::Ref pInp;
-  PD::LI::Font::Ref pFont;
+  PD::Li::DrawList::Ref pDrawList;
+  PD::Li::Font::Ref pFont;
   PD::Vec<Container::Ref> pObjects;
 };
 }  // namespace Flex

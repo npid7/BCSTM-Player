@@ -4,7 +4,7 @@
 
 #include <bcstm/base.hpp>
 #include <ctrff.hpp>
-#include <li_backend_c3d.hpp>
+#include <pd-3ds/bknd-gfx.hpp>
 
 namespace D7 {
 class CTRFFDec : public BCSTMPlayerBase {

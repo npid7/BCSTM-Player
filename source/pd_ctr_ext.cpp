@@ -1,6 +1,5 @@
-#include <li_backend_c3d.hpp>
+#include <pd-3ds.hpp>
 #include <pd_ctr_ext.hpp>
-#include <pd_hid_3ds.hpp>
 
 constexpr u32 DisplayTransferFlags =
     (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) |
@@ -74,11 +73,7 @@ Context* CreateContext() {
                             DisplayTransferFlags);
   C3D_RenderTargetSetOutput(NewCtx->Bottom, GFX_BOTTOM, GFX_LEFT,
                             DisplayTransferFlags);
-  NewCtx->Gfx = PD::LI::Backend_C3D::New();
-  NewCtx->Inp = PD::Hid3DS::New();
-  NewCtx->Gfx->Init();
-  std::vector<PD::u8> wp(16 * 16 * 4, 0xff);
-  NewCtx->WhitePixel = NewCtx->Gfx->LoadTexture(wp, 16, 16);
+  PD::Init();
   if (ActiveContext == nullptr) {
     ActiveContext = NewCtx;
   }
@@ -89,10 +84,6 @@ void DestroyContext(Context* ctx) {
   if (ctx == nullptr) {
     ctx = CheckContext();
   }
-  ctx->WhitePixel = nullptr;
-  ctx->Inp = nullptr;
-  ctx->Gfx->Deinit();
-  ctx->Gfx = nullptr;
   C3D_Fini();
   gfxExit();
   pExceptionCtxA = true;
@@ -100,21 +91,21 @@ void DestroyContext(Context* ctx) {
 
 bool ContextUpdate() {
   auto c = CheckContext();
-  c->Inp->Update();
+  PD::Hid::Update();
   C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
   C3D_RenderTargetClear(c->Top, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_RenderTargetClear(c->Bottom, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_FrameDrawOn(c->Top);
-  c->Gfx->ViewPort = ivec2(400, 240);
-  c->Gfx->NewFrame();
+  PD::Gfx::SetViewPort(ivec2(400, 240));
+  PD::Gfx::NewFrame();
   for (auto& it : c->DrawLists[0]) {
-    c->Gfx->RenderDrawData(it->pDrawList);
+    PD::Gfx::RenderDrawData(it->pDrawList);
     it->Clear();
   }
   C3D_FrameDrawOn(c->Bottom);
-  c->Gfx->ViewPort = ivec2(320, 240);
+  PD::Gfx::SetViewPort(ivec2(320, 240));
   for (auto& it : c->DrawLists[1]) {
-    c->Gfx->RenderDrawData(it->pDrawList);
+    PD::Gfx::RenderDrawData(it->pDrawList);
     it->Clear();
   }
   C3D_FrameEnd(0);
@@ -123,12 +114,7 @@ bool ContextUpdate() {
   return aptMainLoop() && !pExceptionCtx;
 }
 
-PD::LI::Texture::Ref GetWhiteTex() {
-  auto c = CheckContext();
-  return c->WhitePixel;
-}
-
-void AddDrawList(PD::LI::DrawList::Ref cmdl, bool bottom) {
+void AddDrawList(PD::Li::DrawList::Ref cmdl, bool bottom) {
   auto c = CheckContext();
   c->DrawLists[bottom].Add(cmdl);
 }

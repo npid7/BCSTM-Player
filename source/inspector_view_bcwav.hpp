@@ -1,18 +1,17 @@
 #pragma once
 
 #include <cursor.hpp>
-#include <pd.hpp>
+#include <palladium>
 #include <stagemgr.hpp>
 #include <thread>
 
 class InspectorBCWAV : public Stage {
  public:
-  InspectorBCWAV(PD::Hid::Ref inp, PD::LI::Texture::Ref wp, PD::LI::Font::Ref f)
-      : Stage(inp, wp, f) {}
+  InspectorBCWAV(PD::Li::Font::Ref f) : Stage(f) {}
   ~InspectorBCWAV() = default;
-  PD_SMART_CTOR(InspectorBCWAV)
+  PD_SHARED(InspectorBCWAV)
 
-  Cursor cursor = Cursor(fvec2(0.f, 18.f), 17.f);
+  Cursor cursor = Cursor(PD::fvec2(0.f, 18.f), 17.f);
   int sp = 0;
   PD::Timer delta;
 
@@ -22,7 +21,7 @@ class InspectorBCWAV : public Stage {
 
   struct TabEntry {
     TabEntry() {}
-    PD_SMART_CTOR(TabEntry);
+    PD_SHARED(TabEntry);
 
     std::string First;
     std::string Second;

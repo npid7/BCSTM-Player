@@ -78,7 +78,7 @@ add_executable(BCSTM-Player
 )
 
 # Set dependencies, include dirs and definitions
-target_link_libraries(BCSTM-Player PUBLIC m ctrff pd-backend-3ds palladium citro3d ctrud)
+target_link_libraries(BCSTM-Player PUBLIC m ctrff pd-3ds palladium citro3d ctrud)
 target_include_directories(BCSTM-Player PUBLIC
     source
     ${DEVKITPRO}/portlibs/3ds/include
