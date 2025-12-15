@@ -12,7 +12,7 @@ void CTRFFDec::LoadFile(const std::string &path) {
 
   /** Resize the Player Internal Data holders */
   /** Using this allows to not have to much memory allocated */
-  pChannels.Resize(pCurrentFile.GetNumChannels());
+  pChannels.resize(pCurrentFile.GetNumChannels());
   pWaveBuf.resize(pCurrentFile.GetNumChannels());
   pBufferData.resize(pCurrentFile.GetNumChannels());
   for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
@@ -102,7 +102,7 @@ void CTRFFDec::Play() {
       /** still Prefer fill_n over memset */
       std::memset(&pWaveBuf[i][j], 0, sizeof(ndspWaveBuf));
       pWaveBuf[i][j].status = NDSP_WBUF_DONE;
-      pBufferData[i][j].Resize(pCurrentFile.GetBlockSize());
+      pBufferData[i][j].resize(pCurrentFile.GetBlockSize());
     }
   }
   pIsStreaming = true;
@@ -181,7 +181,7 @@ void CTRFFDec::pFillBuffers() {
       ndspWaveBuf *buf = &pWaveBuf[chn_idx][buf_idx];
       memset(buf, 0, sizeof(ndspWaveBuf));
 
-      PD::u8 *data = pBufferData[chn_idx][buf_idx].Data();
+      PD::u8 *data = pBufferData[chn_idx][buf_idx].data();
       pCurrentFile.ReadBlock(pCurrentBlock, data);
       DSP_FlushDataCache(data, pCurrentFile.GetBlockSize());
 
@@ -220,7 +220,7 @@ void CTRFFDec::CleanUp() {
   pIsEnding = false;
   pActiveChannels = 0;
   pCurrentBlock = 0;
-  pChannels.Clear();
+  pChannels.clear();
   pWaveBuf.clear();
   pBufferData.clear();
 }

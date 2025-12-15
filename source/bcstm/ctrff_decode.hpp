@@ -47,8 +47,6 @@ class CTRFFDec : public BCSTMPlayerBase {
 
   void pFillBuffers();
 
-  /** Probably unused */
-  static constexpr PD::u8 MaxChannels = 8;
   static constexpr int BufferCount = 20;
   ctrff::BCSTM pCurrentFile;
   bool pIsLoaded = false;
@@ -61,8 +59,9 @@ class CTRFFDec : public BCSTMPlayerBase {
 
   PD::u32 pCurrentBlock = 0;
   PD::u32 pActiveChannels = 0;
-  PD::Vec<PD::u16> pChannels;
+  std::vector<PD::u16> pChannels;
   std::vector<std::vector<ndspWaveBuf>> pWaveBuf;
-  std::vector<std::vector<PD::Vec<u8, PD::LinearAlloc<u8>>>> pBufferData;
+  std::vector<std::vector<std::vector<u8, PD::LinearAllocator<u8>>>>
+      pBufferData;
 };
 }  // namespace D7

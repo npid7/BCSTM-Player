@@ -2,6 +2,8 @@
 #include <filebrowser.hpp>
 #include <flex/flex.hpp>
 #include <inspector_view.hpp>
+#include <lang.hpp>
+#include <msg_handler.hpp>
 #include <palladium>
 #include <pd-3ds.hpp>
 #include <pd_ctr_ext.hpp>
@@ -19,6 +21,8 @@
  * 4. The whole code of bcstm_player 2.0.0 is completly hardcoded with extern
  * references through all the code and still very unfinished
  */
+
+D7::MsgHandler MsgHnd;
 
 float Offset(float x) {
   float y = cos(x) * 42;
@@ -62,6 +66,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
            */
           ctrl->pFileLoaded = true;
         } catch (const std::exception& e) {
+          MsgHnd.Push(ctrl->player->GetName(), e.what());
           std::cout << "BCSTM CTRL Error: " << e.what() << std::endl;
           ctrl->pFileLoaded = false;
         }
@@ -99,6 +104,7 @@ Inspector::Ref FileInspector;
 InspectorBCWAV::Ref FileInspectorBCWAV;
 Settings::Ref Settings;
 BCSTM_Ctrl bcstm_ctrl;
+D7::Lang Lang;
 
 void BottomScreenBeta(PD::Li::DrawList::Ref l) {
   l->DrawRectFilled(0, PD::fvec2(320, 240), 0xff222222);
@@ -129,6 +135,7 @@ int main() {
   PD::Ctr::CreateContext();
   aptSetSleepAllowed(true);
   auto ret = ndspInit();
+  Lang.Load("romfs:/lang/de/app.json");
   if (R_FAILED(ret)) {
     throw std::runtime_error(
         "ndspfirm.cdc was not found!\n\nNote: You can dump the file "
@@ -136,9 +143,9 @@ int main() {
         "Firmware\n\nThen "
         "Restart this App.");
   }
-  std::thread bcstm_player(BCSTM_Handler, &bcstm_ctrl);
   auto font = PD::Li::Font::New();
   font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
+  MsgHnd = D7::MsgHandler(font);
   auto rl2 = PD::Li::DrawList::New();
   auto rl3 = PD::Li::DrawList::New();
   rl3->SetFont(font);
@@ -147,6 +154,7 @@ int main() {
   FileInspectorBCWAV = InspectorBCWAV::New(font);
   Settings = Settings::New(font);
   Stage::Goto(Filebrowser);
+  std::thread bcstm_player(BCSTM_Handler, &bcstm_ctrl);
 
   PD::Timer time;
   while (PD::Ctr::ContextUpdate()) {
@@ -161,9 +169,12 @@ int main() {
     BottomScreenBeta(rl3);
 
     Stage::DoUpdate();
+    MsgHnd.Update(16.666666);
+
     PD::Ctr::AddDrawList(rl2, false);
     PD::Ctr::AddDrawList(rl3, true);
     PD::Ctr::AddDrawList(Stage::GetDrawDataTop(), false);
+    PD::Ctr::AddDrawList(MsgHnd.GetDrawList(), false);
     // PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Hid::IsDown(PD::Hid::Key::Start)) {
       break;

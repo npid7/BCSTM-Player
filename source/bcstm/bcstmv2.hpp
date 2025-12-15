@@ -127,6 +127,7 @@ class BCSTM2 : public BCSTMPlayerBase {
 
   ndspWaveBuf wave_buf[max_channels][buffer_count];
   ndspAdpcmData adpcm_data[max_channels][2];
-  PD::Vec<u8, PD::LinearAlloc<u8>> buffer_data[max_channels][buffer_count];
+  std::vector<u8, PD::LinearAllocator<u8>> buffer_data[max_channels]
+                                                      [buffer_count];
 };
 }  // namespace D7

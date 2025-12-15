@@ -36,7 +36,7 @@ void FileMgr::Update() {
     }
   }
   Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
-  Top->Text("BCSTM-Player -> Filebrowser")
+  Top->Text(Lang.Get("HEAD_FILEMANAGER"))
       .SetPos(PD::fvec2(5, 1))
       .SetColor(White);
   Top->Rect()

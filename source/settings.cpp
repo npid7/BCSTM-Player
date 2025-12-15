@@ -1,5 +1,6 @@
 #include <bcstm_ctrl.hpp>
 #include <settings.hpp>
+#include <stages.hpp>
 
 void Settings::Update() {
   delta.Update();
@@ -31,7 +32,7 @@ void Settings::Update() {
         .SetColor(White);
   }
   Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
-  Top->Text("BCSTM-Player -> Settings").SetPos(PD::fvec2(5, 1)).SetColor(White);
+  Top->Text(Lang.Get("HEAD_SETTINGS")).SetPos(PD::fvec2(5, 1)).SetColor(White);
   Top->Rect()
       .SetPos(PD::fvec2(0, 222))
       .SetSize(PD::fvec2(400, 18))
@@ -181,8 +182,7 @@ void Settings::Init() {
   List.push_back(MakeCredits());
   List.push_back(TabEntry::New(
       "Decoder", bcstm_ctrl.player->GetName(), [=, this](std::string& s) {
-        s = bcstm_ctrl.player->GetName() == "BCSTMV2" ? "CTRFF (WIP)"
-                                                      : "BCSTMV2";
+        s = bcstm_ctrl.player->GetName() == "CTRFFDec" ? "BCSTMV2" : "CTRFFDec";
         bcstm_ctrl.DoRequest(bcstm_ctrl.SwitchDec);
       }));
   pDL = List;

@@ -149,7 +149,7 @@ void D7::BCSTM2::Play() {
     for (unsigned int j = 0; j < buffer_count; j++) {
       memset(&wave_buf[i][j], 0, sizeof(ndspWaveBuf));
       wave_buf[i][j].status = NDSP_WBUF_DONE;
-      buffer_data[i][j].Resize(block_size);
+      buffer_data[i][j].resize(block_size);
     }
   }
   is_streaming = true;
@@ -245,7 +245,7 @@ void D7::BCSTM2::fill_buffers() {
       ndspWaveBuf* buf = &wave_buf[channelIndex][bufIndex];
 
       memset(buf, 0, sizeof(ndspWaveBuf));
-      buf->data_adpcm = buffer_data[channelIndex][bufIndex].Data();
+      buf->data_adpcm = buffer_data[channelIndex][bufIndex].data();
       pFile.read(
           reinterpret_cast<char*>(buf->data_adpcm),
           (current_block == num_blocks - 1) ? last_block_size : block_size);
