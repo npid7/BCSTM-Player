@@ -124,6 +124,7 @@ void CTRFFDec::Stop() {
   }
   for (PD::u8 i = 0; i < pCurrentFile.GetNumChannels(); i++) {
     ndspChnWaveBufClear(pChannels[i]);
+    ndspChnReset(pChannels[i]);
     pActiveChannels &= ~(1 << pChannels[i]);
   }
   pIsStreaming = false;

@@ -68,6 +68,7 @@ class BCSTM2 : public BCSTMPlayerBase {
   }
   unsigned int GetBlcokSize() const { return block_size; }
   unsigned int GetBlockSamples() const { return block_samples; }
+  inline unsigned int ActiveChannels() const { return active_channels; }
 
   bool pBigEndian = false;
   std::fstream pFile;

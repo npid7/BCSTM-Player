@@ -52,6 +52,7 @@ class BCSTMPlayerBase {
   virtual unsigned int GetSamples() const { return 0; }
   virtual unsigned int GetBlcokSize() const { return 0; }
   virtual unsigned int GetBlockSamples() const { return 0; }
+  virtual unsigned int ActiveChannels() const { return 0; }
 
   std::string GetName() const { return pName; }
 

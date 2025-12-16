@@ -168,6 +168,7 @@ void D7::BCSTM2::Stop() {
   /** Move this loop up (logical issue in < v2.0.0) */
   for (unsigned int i = 0; i < channel_count; i++) {
     ndspChnWaveBufClear(channel[i]);
+    ndspChnReset(channel[i]);
     active_channels &= ~(1 << channel[i]);
   }
   channel_count = 0;

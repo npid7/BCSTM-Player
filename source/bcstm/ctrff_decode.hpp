@@ -44,6 +44,7 @@ class CTRFFDec : public BCSTMPlayerBase {
   inline unsigned int GetBlockSamples() const {
     return pCurrentFile.GetBlockSamples();
   }
+  inline unsigned int ActiveChannels() const { return pActiveChannels; }
 
   void pFillBuffers();
 

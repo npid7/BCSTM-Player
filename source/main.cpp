@@ -122,11 +122,11 @@ void BottomScreenBeta(PD::Li::DrawList::Ref l) {
       std::format(
           "Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
           "Loop Start: "
-          "{}\n  Loop End: {}\n  Decoder: {}",
+          "{}\n  Loop End: {}\n  Decoder: {}\n  ChannelMap: {:#b}",
           bcstm_ctrl.player->GetCurrent(), bcstm_ctrl.player->GetTotal(),
           bcstm_ctrl.player->GetSampleRate(), bcstm_ctrl.player->IsLooping(),
           bcstm_ctrl.player->GetLoopStart(), bcstm_ctrl.player->GetLoopEnd(),
-          bcstm_ctrl.player->GetName()),
+          bcstm_ctrl.player->GetName(), bcstm_ctrl.player->ActiveChannels()),
       0xffffffff);
 }
 
