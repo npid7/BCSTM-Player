@@ -33,7 +33,7 @@ class InspectorBCWAV : public Stage {
   /** THIS System of navigation is very memory inefficient btw */
   std::vector<TabEntry::Ref> pDL;
   std::vector<TabEntry::Ref> List;
-  PD::Stack<std::vector<TabEntry::Ref>> pStack;
-  PD::Stack<PD::Pair<int, int>> pLastPos;
+  std::stack<std::vector<TabEntry::Ref>> pStack;
+  std::stack<std::pair<int, int>> pLastPos;
   std::string pPath;
 };

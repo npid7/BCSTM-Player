@@ -1,3 +1,3 @@
 #include <stagemgr.hpp>
 
-PD::Stack<Stage::Ref> Stage::pStages;
+std::stack<Stage::Ref> Stage::pStages;

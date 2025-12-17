@@ -100,7 +100,7 @@ void FileMgr::Update() {
     if (PD::Hid::IsDown(PD::Hid::Key::A)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Dir) {
-        pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
+        pLastPos.push(std::make_pair(sp, cursor.GetIndex()));
         cursor.SetIndex(0);
         sp = 0;
         ScanDir(FSE.Path);
@@ -117,10 +117,10 @@ void FileMgr::Update() {
         if (cPath == "sdmc:") {
           cPath += "/";
         }
-        if (!pLastPos.IsEmpty()) {
-          sp = pLastPos.Top().First;
-          cursor.SetIndex(pLastPos.Top().Second);
-          pLastPos.Pop();
+        if (!pLastPos.empty()) {
+          sp = pLastPos.top().first;
+          cursor.SetIndex(pLastPos.top().second);
+          pLastPos.pop();
         } else {
           sp = 0;
           cursor.SetIndex(0);

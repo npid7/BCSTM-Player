@@ -109,14 +109,14 @@ bool ContextUpdate() {
     it->Clear();
   }
   C3D_FrameEnd(0);
-  c->DrawLists[0].Clear();
-  c->DrawLists[1].Clear();
+  c->DrawLists[0].clear();
+  c->DrawLists[1].clear();
   return aptMainLoop() && !pExceptionCtx;
 }
 
 void AddDrawList(PD::Li::DrawList::Ref cmdl, bool bottom) {
   auto c = CheckContext();
-  c->DrawLists[bottom].Add(cmdl);
+  c->DrawLists[bottom].push_back(cmdl);
 }
 
 Context& GetContext() {

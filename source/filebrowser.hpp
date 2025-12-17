@@ -13,7 +13,7 @@ class FileMgr : public Stage {
   PD_SHARED(FileMgr)
 
   Cursor cursor = Cursor(PD::fvec2(0.f, 18.f), 17.f);
-  PD::Stack<PD::Pair<int, int>> pLastPos;
+  std::stack<std::pair<int, int>> pLastPos;
   int sp = 0;
   PD::Timer delta;
 

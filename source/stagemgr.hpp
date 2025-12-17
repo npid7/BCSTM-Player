@@ -17,21 +17,21 @@ class Stage {
 
   virtual void Update() {}
 
-  static void Goto(Stage::Ref s) { pStages.Push(s); }
-  static void Back() { pStages.Pop(); }
+  static void Goto(Stage::Ref s) { pStages.push(s); }
+  static void Back() { pStages.pop(); }
   static void DoUpdate() {
-    pStages.Top()->Top->pDrawList->Clear();
-    pStages.Top()->Bottom->pDrawList->Clear();
-    pStages.Top()->Update();
-    pStages.Top()->Top->Update();
-    pStages.Top()->Bottom->Update();
+    pStages.top()->Top->pDrawList->Clear();
+    pStages.top()->Bottom->pDrawList->Clear();
+    pStages.top()->Update();
+    pStages.top()->Top->Update();
+    pStages.top()->Bottom->Update();
   };
   static PD::Li::DrawList::Ref GetDrawDataTop() {
-    return pStages.Top()->Top->pDrawList;
+    return pStages.top()->Top->pDrawList;
   }
   static PD::Li::DrawList::Ref GetDrawDataBottom() {
-    return pStages.Top()->Bottom->pDrawList;
+    return pStages.top()->Bottom->pDrawList;
   }
 
-  static PD::Stack<Stage::Ref> pStages;
+  static std::stack<Stage::Ref> pStages;
 };

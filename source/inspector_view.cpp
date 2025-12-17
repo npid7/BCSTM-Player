@@ -98,28 +98,28 @@ void Inspector::Update() {
   if (PD::Hid::IsDown(PD::Hid::Key::A)) {
     auto FSE = pDL.at(cursor.pIndex + sp);
     if (FSE->SubData.size() != 0) {
-      pLastPos.Push(PD::Pair<int, int>(sp, cursor.GetIndex()));
+      pLastPos.push(std::make_pair(sp, cursor.GetIndex()));
       cursor.SetIndex(0);
       sp = 0;
-      pStack.Push(pDL);
+      pStack.push(pDL);
       pDL = FSE->SubData;
     }
   }
 
   if (PD::Hid::IsDown(PD::Hid::Key::B)) {
-    if (!pLastPos.IsEmpty()) {
-      sp = pLastPos.Top().First;
-      cursor.SetIndex(pLastPos.Top().Second);
-      pLastPos.Pop();
+    if (!pLastPos.empty()) {
+      sp = pLastPos.top().first;
+      cursor.SetIndex(pLastPos.top().second);
+      pLastPos.pop();
     } else {
       sp = 0;
       cursor.SetIndex(0);
     }
-    if (pStack.IsEmpty()) {
+    if (pStack.empty()) {
       Back();
     } else {
-      pDL = pStack.Top();
-      pStack.Pop();
+      pDL = pStack.top();
+      pStack.pop();
     }
   }
 }

@@ -52,10 +52,10 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
     if (ctrl->pFileLoaded) {
       ctrl->player->Stream();
     }
-    if (ctrl->pRequests.Size() == 0) {
+    if (ctrl->pRequests.size() == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
     } else {
-      auto t = ctrl->pRequests.Front();
+      auto t = ctrl->pRequests.front();
       if (t.req == BCSTM_Ctrl::OpenFile) {
 #if __EXCEPTIONS
         try {
@@ -94,7 +94,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
           ctrl->player = new D7::BCSTM2();
         }
       }
-      ctrl->pRequests.PopFront();
+      ctrl->pRequests.pop_front();
     }
   }
 }

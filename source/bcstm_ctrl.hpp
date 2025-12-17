@@ -23,11 +23,11 @@ struct BCSTM_Ctrl {
   };
 
   void DoRequest(ReqType t, const std::string& dat = "") {
-    pRequests.PushBack(Request(t, dat));
+    pRequests.push_back(Request(t, dat));
   }
 
   D7::BCSTMPlayerBase* player = nullptr;
-  PD::List<Request> pRequests;
+  std::list<Request> pRequests;
   bool pFileLoaded = false;
 };
 

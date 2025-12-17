@@ -8,7 +8,7 @@ struct Context {
   C3D_RenderTarget* Top;
   C3D_RenderTarget* Bottom;
 
-  PD::Vec<PD::Li::DrawList::Ref> DrawLists[2];
+  std::vector<PD::Li::DrawList::Ref> DrawLists[2];
 };
 
 Context* CreateContext();
