@@ -7,7 +7,7 @@
 
 class Settings : public Stage {
  public:
-  Settings(PD::Li::Font::Ref f) : Stage(f) { Init(); }
+  Settings(PD::Li::Font::Ref f) : Stage(f) {}
   ~Settings() = default;
   PD_SHARED(Settings);
 
@@ -38,6 +38,8 @@ class Settings : public Stage {
   };
 
   static TabEntry::Ref MakeEntry(const std::string& id, const std::string& val);
+  TabEntry::Ref MakeLang();
+  TabEntry::Ref MakeThemes();
 
   /** THIS System of navigation is very memory inefficient btw */
   std::vector<TabEntry::Ref> pDL;

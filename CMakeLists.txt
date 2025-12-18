@@ -63,6 +63,7 @@ add_subdirectory(ctrff)
 add_executable(BCSTM-Player
     source/main.cpp
     source/pd_ctr_ext.cpp
+    source/colors.cpp
     source/filebrowser.cpp
     source/inspector_view.cpp
     source/inspector_view_bcwav.cpp

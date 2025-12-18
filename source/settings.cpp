@@ -11,32 +11,33 @@ void Settings::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(0, 18 + 17 * i))
         .SetSize(PD::fvec2(200, 17))
-        .SetColor(((i % 2) == 0) ? PD::Color("#222222aa")
-                                 : PD::Color("#333333aa"));
+        .SetColor(((i % 2) == 0) ? gTheme.ListEven : gTheme.ListOdd);
     Top->Rect()
         .SetPos(PD::fvec2(200, 18 + 17 * i))
         .SetSize(PD::fvec2(200, 17))
-        .SetColor(((i % 2) != 0) ? PD::Color("#222222aa")
-                                 : PD::Color("#333333aa"));
+        .SetColor(((i % 2) != 0) ? gTheme.ListEven : gTheme.ListOdd);
   }
   Top->Rect()
       .SetPos(cursor)
       .SetSize(PD::fvec2(400, 17))
-      .SetColor(PD::Color("#222222cc"));
+      .SetColor(gTheme.Selector);
   for (int i = 0; i < int(pDL.size() > 12 ? 12 : pDL.size()); i++) {
     Top->Text(pDL.at(sp + i)->First)
         .SetPos(PD::fvec2(5, 18 + 17 * i))
-        .SetColor(White);
+        .SetColor(gTheme.Text);
     Top->Text(pDL.at(sp + i)->Second)
         .SetPos(PD::fvec2(205, 18 + 17 * i))
-        .SetColor(White);
+        .SetColor(gTheme.Text);
   }
-  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
-  Top->Text(Lang.Get("HEAD_SETTINGS")).SetPos(PD::fvec2(5, 1)).SetColor(White);
+  Top->Rect().SetColor(gTheme.Header).SetPos(0).SetSize(PD::fvec2(400, 18));
+  Top->Text(Lang.Get("HEAD_SETTINGS"))
+      .SetPos(PD::fvec2(5, 1))
+      .SetColor(gTheme.Text);
   Top->Rect()
       .SetPos(PD::fvec2(0, 222))
       .SetSize(PD::fvec2(400, 18))
-      .SetColor(DesignerHeader);
+      .SetColor(gTheme.Footer);
+  Top->Text(Lang.Get("TPWMR")).SetPos(PD::fvec2(5, 222)).SetColor(gTheme.Text);
   if (pDL.size() > 12) {
     float rect_h = (12.f / (float)pDL.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -46,7 +47,7 @@ void Settings::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(396, rect_pos))
         .SetSize(PD::fvec2(4, rect_h))
-        .SetColor(DarkGray);
+        .SetColor(gTheme.Slider);
   }
 
   if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
@@ -155,7 +156,7 @@ Settings::TabEntry::Ref MakeInfo() {
                                       "OFF"
 #endif
                                       ));
-  e->First = "Show Info";
+  e->First = Lang.Get("SHOW_INFO");
   e->SubData = pData;
   return e;
 }
@@ -170,20 +171,62 @@ Settings::TabEntry::Ref MakeCredits() {
   pData.push_back(Settings::MakeEntry("3DBrew", "BCSTM Documentation"));
   pData.push_back(Settings::MakeEntry("crozynski", "ComicNeue Font"));
 
-  e->First = "Credits";
+  e->First = Lang.Get("CREDITS");
+  e->SubData = pData;
+  return e;
+}
+
+Settings::TabEntry::Ref Settings::MakeLang() {
+  auto e = Settings::TabEntry::New();
+  std::vector<Settings::TabEntry::Ref> pData;
+  for (auto& it : std::filesystem::directory_iterator("romfs:/lang")) {
+    D7::Lang tmp;
+    tmp.Load(it.path().string());
+    pData.push_back(Settings::TabEntry::New(
+        tmp.Id(), tmp.Name() + " - " + tmp.Author(), [=, this](std::string& s) {
+          Lang.Load(it.path().string());
+          Init();
+        }));
+  }
+
+  e->First = Lang.Get("LANGUAGE");
+  e->SubData = pData;
+  return e;
+}
+
+Settings::TabEntry::Ref Settings::MakeThemes() {
+  auto e = Settings::TabEntry::New();
+  std::vector<Settings::TabEntry::Ref> pData;
+  for (auto& it :
+       std::filesystem::directory_iterator("sdmc:/3ds/BCSTM-Player/themes")) {
+    pData.push_back(Settings::TabEntry::New(
+        it.path().filename().stem().string(), "",
+        [=, this](std::string& s) { gTheme.Load(it.path().string()); }));
+  }
+
+  e->First = Lang.Get("THEMES");
   e->SubData = pData;
   return e;
 }
 
 void Settings::Init() {
   List.clear();
+  sp = 0;
+  while (!pStack.empty()) {
+    pStack.pop();
+  }
+  while (!pLastPos.empty()) {
+    pLastPos.pop();
+  }
 
-  List.push_back(MakeInfo());
-  List.push_back(MakeCredits());
   List.push_back(TabEntry::New(
       "Decoder", bcstm_ctrl.player->GetName(), [=, this](std::string& s) {
         s = bcstm_ctrl.player->GetName() == "CTRFFDec" ? "BCSTMV2" : "CTRFFDec";
         bcstm_ctrl.DoRequest(bcstm_ctrl.SwitchDec);
       }));
+  List.push_back(MakeLang());
+  List.push_back(MakeThemes());
+  List.push_back(MakeCredits());
+  List.push_back(MakeInfo());
   pDL = List;
 }

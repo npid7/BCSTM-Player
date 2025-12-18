@@ -13,7 +13,7 @@
         "BGB": "Press \uE001 to go back!",
         "TPWMR": "This Project was made with Palladium.",
         "BROWSE": "Browse",
-        "LANGUAGE": "Language: ",
+        "LANGUAGE": "Language",
         "SETTINGS": "Settings",
         "CONTROLCENTER": "Contol Center",
         "CREDITSL": "- tobid7\n  lead developer\n- devkitpro\n  libctru, citro3d, citro2d",
@@ -43,6 +43,7 @@
         "TRANSISIONS": "Transitions",
         "NEXT": "Next: ",
         "RD7TF_THEME": "rd7tf Theme",
+        "THEMES": "Themes",
         "CLOCK": "Clock",
         "24HRS": "24 hours",
         "SHOWSECONDS": "Show Seconds",
@@ -60,6 +61,8 @@
         "INSTERR": "Installer error",
         "INSTALLING": "Installing",
         "EXECMODE": "Executed as: ",
-        "UPTFND": "Update available!"
+        "UPTFND": "Update available!",
+        "CREDITS": "Credits",
+        "SHOW_INFO": "Show Info"
     }
 }

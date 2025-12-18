@@ -55,14 +55,16 @@ void MsgHandler::Elem::SlideOut() {
 }
 
 void MsgHandler::Elem::Move(int idx) {
-  if (!pSettings || ToBeRemoved) {
-    return;  // Just Skip Movement cause tey'll move already out of screen
+  if (!pSettings) {
+    return;
   }
+  auto Pos2 = Pos;
+  Pos2.Finish();
   // Move One Element + Padding Up in 0.5 seconds
   Pos.From(Pos)
-      .To(PD::fvec2(pSettings->Padding, pSettings->VpH - (pSettings->MsgSize.y +
-                                                          pSettings->Padding) *
-                                                             (idx + 1)))
+      .To(PD::fvec2(Pos2.Get().x, pSettings->VpH - (pSettings->MsgSize.y +
+                                                    pSettings->Padding) *
+                                                       (idx + 1)))
       .In(pSettings->Move)
       .As(Pos.EaseInOutSine);
   MyIdx = idx;  // Set new index

@@ -22,7 +22,8 @@
  * references through all the code and still very unfinished
  */
 
-D7::MsgHandler MsgHnd;
+D7::MsgHandler::Ref MsgHnd = nullptr;
+Theme gTheme;
 
 float Offset(float x) {
   float y = cos(x) * 42;
@@ -37,7 +38,6 @@ void Append(PD::Li::DrawList::Ref l, int index, PD::fvec2 position,
   float y_position = position.y + size.y / 8 * (index / 11) + 40 +
                      sin(offset + time) * 10 + 30;
   float color_effect = 1 - exp(-(index / 11) / 3.0f);
-
   l->DrawTriangleFilled(PD::fvec2(x_position, y_position),
                         PD::fvec2(x_position + 300, y_position + (90)),
                         PD::fvec2(x_position - 300, y_position + (90)),
@@ -66,7 +66,7 @@ void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
            */
           ctrl->pFileLoaded = true;
         } catch (const std::exception& e) {
-          MsgHnd.Push(ctrl->player->GetName(), e.what());
+          MsgHnd->Push(ctrl->player->GetName(), e.what());
           std::cout << "BCSTM CTRL Error: " << e.what() << std::endl;
           ctrl->pFileLoaded = false;
         }
@@ -130,12 +130,34 @@ void BottomScreenBeta(PD::Li::DrawList::Ref l) {
       0xffffffff);
 }
 
+std::string Clock22() {
+  const time_t ut = time(0);
+  bool h24 = true;
+  bool ds = true;
+  auto ts = localtime(&ut);
+  if (!h24) {
+    int hr = ts->tm_hour % 12;
+    if (hr == 0) hr = 12;
+    if (!ds) {
+      return std::format("{}:{:02} {}", hr, ts->tm_min,
+                         ts->tm_hour >= 12 ? "PM" : "AM");
+    }
+    return std::format("{}:{:02}:{:02} {}", hr, ts->tm_min, ts->tm_sec,
+                       ts->tm_hour >= 12 ? "PM" : "AM");
+  }
+  if (!ds) {
+    return std::format("{}:{:02}", ts->tm_hour, ts->tm_min);
+  }
+  return std::format("{}:{:02}:{:02}", ts->tm_hour, ts->tm_min, ts->tm_sec);
+}
+
 int main() {
   PD::Ctr::EnableExceptionScreen();
   PD::Ctr::CreateContext();
+  std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
+  gTheme.Load("sdmc:/3ds/BCSTM-Player/themes/default.json");
   aptSetSleepAllowed(true);
   auto ret = ndspInit();
-  Lang.Load("romfs:/lang/de/app.json");
   if (R_FAILED(ret)) {
     throw std::runtime_error(
         "ndspfirm.cdc was not found!\n\nNote: You can dump the file "
@@ -145,7 +167,13 @@ int main() {
   }
   auto font = PD::Li::Font::New();
   font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
-  MsgHnd = D7::MsgHandler(font);
+  MsgHnd = D7::MsgHandler::New(font);
+  try {
+    Lang.Load("romfs:/lang/" + PD::Ctr::GetSystemLanguage() + ".json");
+  } catch (const std::runtime_error& e) {
+    MsgHnd->Push("Lang Error:", e.what());
+    Lang.Load("romfs:/lang/en.json");
+  }
   auto rl2 = PD::Li::DrawList::New();
   auto rl3 = PD::Li::DrawList::New();
   rl3->SetFont(font);
@@ -169,12 +197,13 @@ int main() {
     BottomScreenBeta(rl3);
 
     Stage::DoUpdate();
-    MsgHnd.Update(16.666666);
-
+    MsgHnd->Update(16.666666);
+    Stage::GetDrawDataTop()->DrawTextEx(PD::fvec2(395, 0), Clock22(),
+                                        gTheme.Text, LiTextFlags_AlignRight);
     PD::Ctr::AddDrawList(rl2, false);
     PD::Ctr::AddDrawList(rl3, true);
     PD::Ctr::AddDrawList(Stage::GetDrawDataTop(), false);
-    PD::Ctr::AddDrawList(MsgHnd.GetDrawList(), false);
+    PD::Ctr::AddDrawList(MsgHnd->GetDrawList(), false);
     // PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Hid::IsDown(PD::Hid::Key::Start)) {
       break;

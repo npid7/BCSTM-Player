@@ -18,5 +18,6 @@ void DestroyContext(Context* ctx = nullptr);
 void AddDrawList(PD::Li::DrawList::Ref cmdl, bool bottom);
 bool ContextUpdate();
 Context& GetContext();
+std::string GetSystemLanguage();
 }  // namespace Ctr
 }  // namespace PD

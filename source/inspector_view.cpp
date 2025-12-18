@@ -1,5 +1,6 @@
 #include <ctrff.hpp>
 #include <inspector_view.hpp>
+#include <stages.hpp>
 
 void Inspector::Update() {
   delta.Update();
@@ -10,38 +11,36 @@ void Inspector::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(0, 18 + 17 * i))
         .SetSize(PD::fvec2(200, 17))
-        .SetColor(((i % 2) == 0) ? PD::Color("#222222aa")
-                                 : PD::Color("#333333aa"));
+        .SetColor(((i % 2) == 0) ? gTheme.ListEven : gTheme.ListOdd);
     Top->Rect()
         .SetPos(PD::fvec2(200, 18 + 17 * i))
         .SetSize(PD::fvec2(200, 17))
-        .SetColor(((i % 2) != 0) ? PD::Color("#222222aa")
-                                 : PD::Color("#333333aa"));
+        .SetColor(((i % 2) != 0) ? gTheme.ListEven : gTheme.ListOdd);
   }
   Top->Rect()
       .SetPos(cursor)
       .SetSize(PD::fvec2(400, 17))
-      .SetColor(PD::Color("#222222cc"));
+      .SetColor(gTheme.Selector);
   for (int i = 0; i < int(pDL.size() > 12 ? 12 : pDL.size()); i++) {
     Top->Text(pDL.at(sp + i)->First)
         .SetPos(PD::fvec2(5, 18 + 17 * i))
-        .SetColor(White);
+        .SetColor(gTheme.Text);
     Top->Text(pDL.at(sp + i)->Second)
         .SetPos(PD::fvec2(205, 18 + 17 * i))
-        .SetColor(White);
+        .SetColor(gTheme.Text);
   }
-  Top->Rect().SetColor(DesignerHeader).SetPos(0).SetSize(PD::fvec2(400, 18));
+  Top->Rect().SetColor(gTheme.Header).SetPos(0).SetSize(PD::fvec2(400, 18));
   Top->Text("BCSTM-Player -> File Inspector")
       .SetPos(PD::fvec2(5, 1))
-      .SetColor(White);
+      .SetColor(gTheme.Text);
   Top->Rect()
       .SetPos(PD::fvec2(0, 222))
       .SetSize(PD::fvec2(400, 18))
-      .SetColor(DesignerHeader);
+      .SetColor(gTheme.Footer);
   /** Only use Filename due to no space */
   Top->Text(std::filesystem::path(pPath).filename().string())
       .SetPos(PD::fvec2(5, 223))
-      .SetColor(White);
+      .SetColor(gTheme.Text);
   if (pDL.size() > 12) {
     float rect_h = (12.f / (float)pDL.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -51,7 +50,7 @@ void Inspector::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(396, rect_pos))
         .SetSize(PD::fvec2(4, rect_h))
-        .SetColor(DarkGray);
+        .SetColor(gTheme.Slider);
   }
 
   if (PD::Hid::IsUp(PD::Hid::Key::Down) &&

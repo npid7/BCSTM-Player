@@ -9,7 +9,7 @@ class MsgHandler {
   struct Settings {
     Settings() {}
     PD::fvec2 MsgSize = PD::fvec2(160, 54);
-    PD::u32 ClrBackground = PD::Color("#333333aa");
+    PD::u32 ClrBackground = PD::Color("#333333cc");
     PD::u32 ClrText = PD::Color("#ffffff");
     float FontScale = 0.6f;
     float MaxTime = 5.f;
@@ -57,6 +57,7 @@ class MsgHandler {
     pSettings = s;
   }
   ~MsgHandler() = default;
+  PD_SHARED(MsgHandler)
 
   void Push(const std::string& head, const std::string& Body);
   PD::Li::DrawList::Ref GetDrawList();

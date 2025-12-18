@@ -11,3 +11,4 @@ extern Inspector::Ref FileInspector;
 extern InspectorBCWAV::Ref FileInspectorBCWAV;
 extern Settings::Ref Settings;
 extern D7::Lang Lang;
+extern Theme gTheme;

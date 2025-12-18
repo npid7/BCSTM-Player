@@ -123,5 +123,32 @@ Context& GetContext() {
   CheckContext();
   return *ActiveContext;
 }
+
+std::string GetSystemLanguage() {
+  cfguInit();
+  u8 res = 0;
+  CFGU_GetSystemLanguage(&res);
+  std::string ret;
+  // clang-format off
+  // disable clanf-format here
+  switch (res) {
+    case 0: ret = "jp"; break;     // Japanese
+    case 1: ret = "en"; break;     // English
+    case 2: ret = "fr"; break;     // French
+    case 3: ret = "de"; break;     // German
+    case 4: ret = "it"; break;     // Italian
+    case 5: ret = "es"; break;     // Spanish
+    case 6: ret = "zh-CN"; break;  // Chinese (Simplified)
+    case 7: ret = "ko"; break;     // Korean
+    case 8: ret = "nl"; break;     // Dutch
+    case 9: ret = "pt"; break;     // Portuguese
+    case 10: ret = "ru"; break;    // Russian
+    case 11: ret = "zh-TW"; break; // Chinese (Traditional)
+    default: ret = "en"; break;    // Fall back to English if missing
+  }
+  // clang-format on
+  cfguExit();
+  return ret;
+}
 }  // namespace Ctr
 }  // namespace PD

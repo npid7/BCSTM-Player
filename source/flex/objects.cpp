@@ -1,4 +1,5 @@
 #include <flex/objects.hpp>
+extern Theme gTheme;
 
 namespace PD {
 namespace Flex {
@@ -22,8 +23,8 @@ void Image::Draw(PD::Li::DrawList::Ref l) const {
   l->DrawRectFilled(pPos, fvec2(size.x, size.y), pColor);
 }
 void Button::Draw(PD::Li::DrawList::Ref l) const {
-  l->DrawRectFilled(pPos, 40, Gray);
-  l->DrawText(pPos + 2, pName, White);
+  l->DrawRectFilled(pPos, 40, gTheme.Button);
+  l->DrawText(pPos + 2, pName, gTheme.Text);
 }
 }  // namespace Flex
 }  // namespace PD
