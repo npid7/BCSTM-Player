@@ -37,7 +37,7 @@ void Settings::Update() {
       .SetPos(PD::fvec2(0, 222))
       .SetSize(PD::fvec2(400, 18))
       .SetColor(gTheme.Footer);
-  Top->Text(Lang.Get("TPWMR")).SetPos(PD::fvec2(5, 222)).SetColor(gTheme.Text);
+  Top->Text(Lang.Get("TPWMR")).SetPos(PD::fvec2(5, 223)).SetColor(gTheme.Text);
   if (pDL.size() > 12) {
     float rect_h = (12.f / (float)pDL.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -49,6 +49,10 @@ void Settings::Update() {
         .SetSize(PD::fvec2(4, rect_h))
         .SetColor(gTheme.Slider);
   }
+  Bottom->Rect()
+      .SetPos(0)
+      .SetSize(PD::fvec2(320, 240))
+      .SetColor(gTheme.Background);
 
   if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
       sp + cursor.pIndex < (int)pDL.size() - 1) {
@@ -161,15 +165,18 @@ Settings::TabEntry::Ref MakeInfo() {
   return e;
 }
 
-Settings::TabEntry::Ref MakeCredits() {
-  auto e = Settings::TabEntry::New();
-  std::vector<Settings::TabEntry::Ref> pData;
-  pData.push_back(Settings::MakeEntry("tobid7", "Lead deceloper, assets"));
-  pData.push_back(Settings::MakeEntry("", "palladium, ctrff"));
-  pData.push_back(Settings::MakeEntry("devkitpro", "libctru, citro3d"));
-  pData.push_back(Settings::MakeEntry("cheuble", "Original BCSTMV1-Decoder"));
-  pData.push_back(Settings::MakeEntry("3DBrew", "BCSTM Documentation"));
-  pData.push_back(Settings::MakeEntry("crozynski", "ComicNeue Font"));
+Settings::TabEntry::Ref Settings::MakeCredits() {
+  auto e = TabEntry::New();
+  std::vector<TabEntry::Ref> pData;
+  pData.push_back(MakeEntry("tobid7", "Lead deceloper, assets"));
+  pData.push_back(MakeEntry("", "palladium, ctrff"));
+  pData.push_back(MakeEntry("devkitpro", "libctru, citro3d"));
+  pData.push_back(MakeEntry("cheuble", "Original BCSTMV1-Decoder"));
+  pData.push_back(MakeEntry("3DBrew", "BCSTM Documentation"));
+  auto pSpecial = MakeLicenseText("romfs:/license/ComicNeue.txt");
+  pSpecial->First = "crozynski";
+  pSpecial->Second = "ComicNeue Font";
+  pData.push_back(pSpecial);
 
   e->First = Lang.Get("CREDITS");
   e->SubData = pData;
@@ -205,6 +212,38 @@ Settings::TabEntry::Ref Settings::MakeThemes() {
   }
 
   e->First = Lang.Get("THEMES");
+  e->SubData = pData;
+  return e;
+}
+
+Settings::TabEntry::Ref Settings::MakeLicenseText(const std::string& path) {
+  auto e = Settings::TabEntry::New();
+  std::vector<Settings::TabEntry::Ref> pData;
+  std::fstream iff(path, std::ios::in);
+  if (iff) {
+    std::string theline;
+    while (std::getline(iff, theline)) {
+      std::istringstream is(theline);
+      std::string line;
+      std::string tmp;
+      while (is >> tmp) {
+        if (Top->pFont
+                ->GetTextBounds(line + " " + tmp, Top->pDrawList->pFontScale)
+                .x < 390) {
+          if (!line.empty()) {
+            line += " ";
+          }
+          line += tmp;
+        } else {
+          pData.push_back(MakeEntry(line, ""));
+          line = tmp;
+        }
+      }
+      pData.push_back(MakeEntry(line, ""));
+    }
+  }
+  iff.close();
+  e->First = Lang.Get("LICENSE");
   e->SubData = pData;
   return e;
 }

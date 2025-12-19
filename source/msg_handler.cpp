@@ -5,6 +5,7 @@ void MsgHandler::Elem::Render() {
   if (!pSettings) {
     return;
   }
+  Rendered->Layer(pSettings->BaseLayer);
   Rendered->DrawSolid();  // Draw Solid
   Rendered->SetFontScale(pSettings->FontScale);
   Rendered->DrawRectFilled(Pos, pSettings->MsgSize,
@@ -14,6 +15,7 @@ void MsgHandler::Elem::Render() {
   Rendered->PathAdd(Pos.Get() + PD::fvec2(pSettings->MsgSize.x - 4, 13));
   Rendered->PathStroke(PD::Color("#ffffff"));
   // Draw Header and Body
+  Rendered->pLayer++;
   Rendered->DrawText(Pos.Get() + PD::fvec2(2, 0), Header, pSettings->ClrText);
   PD::fvec2 tp = Pos.Get() + PD::fvec2(2, 13);
   PD::fvec2 bs = pSettings->MsgSize - PD::fvec2(4, 13);
@@ -25,6 +27,7 @@ void MsgHandler::Elem::Render() {
         std::format("{:.1f}\n[{:.0f}, {:.0f}]", Time, Pos.Get().x, Pos.Get().y),
         PD::Color("#ff00ff"));
   }
+  Rendered->pLayer--;
 }
 
 void MsgHandler::Elem::SlideIn() {

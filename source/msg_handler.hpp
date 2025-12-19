@@ -19,6 +19,7 @@ class MsgHandler {
     float Padding = 5.f;
     float VpH = 240.f;
     bool Debug = false;
+    int BaseLayer = 3;
   };
 
   struct Elem {

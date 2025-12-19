@@ -90,9 +90,11 @@ void DestroyContext(Context* ctx) {
 }
 
 bool ContextUpdate() {
+  PD::TT::Scope s("CtxUpdateSync");
   auto c = CheckContext();
   PD::Hid::Update();
   C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+  PD::TT::Scope s2("CtxUpdate");
   C3D_RenderTargetClear(c->Top, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_RenderTargetClear(c->Bottom, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_FrameDrawOn(c->Top);

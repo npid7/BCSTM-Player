@@ -60,6 +60,7 @@ class Context {
   }
 
   void Update() {
+    pDrawList->Layer(1);
     for (auto it : pObjects) {
       it->Draw(pDrawList);
     }

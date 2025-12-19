@@ -12,19 +12,25 @@ void Triangle::Draw(PD::Li::DrawList::Ref l) const {
   l->DrawTriangleFilled(pPosA, pPosB, pPosC, pColor);
 }
 void Text::Draw(PD::Li::DrawList::Ref l) const {
+  l->pLayer++;
   l->DrawText(pPos, pText, pColor);
+  l->pLayer--;
 }
 void Image::Draw(PD::Li::DrawList::Ref l) const {
   ivec2 size = pTex->GetSize();
   if (pSize != fvec2(-1.f, -1.f)) {
     size = ivec2(pSize.x, pSize.y);
   }
+  l->pLayer++;
   l->DrawTexture(pTex);
   l->DrawRectFilled(pPos, fvec2(size.x, size.y), pColor);
+  l->pLayer--;
 }
 void Button::Draw(PD::Li::DrawList::Ref l) const {
   l->DrawRectFilled(pPos, 40, gTheme.Button);
+  l->pLayer++;
   l->DrawText(pPos + 2, pName, gTheme.Text);
+  l->pLayer--;
 }
 }  // namespace Flex
 }  // namespace PD

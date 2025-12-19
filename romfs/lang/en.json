@@ -63,6 +63,7 @@
         "EXECMODE": "Executed as: ",
         "UPTFND": "Update available!",
         "CREDITS": "Credits",
-        "SHOW_INFO": "Show Info"
+        "SHOW_INFO": "Show Info",
+        "LICENSE": "License"
     }
 }

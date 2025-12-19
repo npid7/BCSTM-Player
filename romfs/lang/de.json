@@ -63,6 +63,7 @@
         "EXECMODE": "Ausgeführt als: ",
         "UPTFND": "Update verfügbar!",
         "CREDITS": "Mitwirkende",
-        "SHOW_INFO": "Zeige Informationen"
+        "SHOW_INFO": "Zeige Informationen",
+        "LICENSE": "Lizenz"
     }
 }

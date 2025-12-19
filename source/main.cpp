@@ -107,27 +107,34 @@ BCSTM_Ctrl bcstm_ctrl;
 D7::Lang Lang;
 
 void BottomScreenBeta(PD::Li::DrawList::Ref l) {
-  l->DrawRectFilled(0, PD::fvec2(320, 240), 0xff222222);
-  l->DrawRectFilled(5, PD::fvec2(310, 20), 0xff111111);
-  l->DrawRectFilled(7, PD::fvec2(306, 16), 0xff222222);
+  l->DrawRectFilled(0, PD::fvec2(320, 240), gTheme.Background);
+  l->DrawRectFilled(5, PD::fvec2(310, 20), gTheme.ListOdd);
+  l->DrawRectFilled(7, PD::fvec2(306, 16), gTheme.Background);
   float scale = 0.f;
 
   if (bcstm_ctrl.player->GetTotal() != 0) {
     scale = (float)bcstm_ctrl.player->GetCurrent() /
             (float)bcstm_ctrl.player->GetTotal();
   }
-  l->DrawRectFilled(7, PD::fvec2(306 * scale, 16), 0xff00ff00);
+  l->DrawRectFilled(7, PD::fvec2(306 * scale, 16), gTheme.Progressbar);
   l->DrawText(
       PD::fvec2(7, 28),
       std::format(
           "Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
           "Loop Start: "
-          "{}\n  Loop End: {}\n  Decoder: {}\n  ChannelMap: {:#b}",
+          "{}\n  Loop End: {}\n  Decoder: {}\n  ChannelMap: {:#b}\nOp: "
+          "{}\nCtx: {}\nMain: {}",
           bcstm_ctrl.player->GetCurrent(), bcstm_ctrl.player->GetTotal(),
           bcstm_ctrl.player->GetSampleRate(), bcstm_ctrl.player->IsLooping(),
           bcstm_ctrl.player->GetLoopStart(), bcstm_ctrl.player->GetLoopEnd(),
-          bcstm_ctrl.player->GetName(), bcstm_ctrl.player->ActiveChannels()),
-      0xffffffff);
+          bcstm_ctrl.player->GetName(), bcstm_ctrl.player->ActiveChannels(),
+          PD::Strings::FormatNanos(
+              PD::OS::GetTraceRef("Optimize")->GetProtocol()->GetAverage()),
+          PD::Strings::FormatNanos(
+              PD::OS::GetTraceRef("CtxUpdate")->GetProtocol()->GetAverage()),
+          PD::Strings::FormatNanos(
+              PD::OS::GetTraceRef("mainloop")->GetProtocol()->GetAverage())),
+      gTheme.Text);
 }
 
 std::string Clock22() {
@@ -151,11 +158,38 @@ std::string Clock22() {
   return std::format("{}:{:02}:{:02}", ts->tm_hour, ts->tm_min, ts->tm_sec);
 }
 
+void InitThemes() {
+  std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
+  u8* d = new u8[1024];
+  for (auto& it : std::filesystem::directory_iterator("romfs:/themes/")) {
+    auto p = "sdmc:/3ds/BCSTM-Player/themes/" + it.path().filename().string();
+    if (std::filesystem::exists(p)) {
+      continue;
+    }
+    std::ifstream iff(it.path().string(), std::ios::binary);
+    std::ofstream off(p, std::ios::binary);
+
+    while (true) {
+      iff.read((char*)d, 1024);
+      size_t rb = iff.gcount();
+      if (rb) {
+        off.write((const char*)d, rb);
+      }
+      if (rb != 1024) {
+        break;
+      }
+    }
+    iff.close();
+    off.close();
+  }
+  delete[] d;
+  gTheme.Load("sdmc:/3ds/BCSTM-Player/themes/default.json");
+}
+
 int main() {
   PD::Ctr::EnableExceptionScreen();
   PD::Ctr::CreateContext();
-  std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
-  gTheme.Load("sdmc:/3ds/BCSTM-Player/themes/default.json");
+  InitThemes();
   aptSetSleepAllowed(true);
   auto ret = ndspInit();
   if (R_FAILED(ret)) {
@@ -165,6 +199,7 @@ int main() {
         "Firmware\n\nThen "
         "Restart this App.");
   }
+  // auto font = PD::LoadSystemFont();
   auto font = PD::Li::Font::New();
   font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
   MsgHnd = D7::MsgHandler::New(font);
@@ -185,11 +220,17 @@ int main() {
   std::thread bcstm_player(BCSTM_Handler, &bcstm_ctrl);
 
   PD::Timer time;
+  PD::Timer time22;
+  double delta;
   while (PD::Ctr::ContextUpdate()) {
     PD::TT::Scope s("mainloop");
     time.Update();
+    time22.Update();
+    delta = time22.GetSeconds() * 1000.0;
+    time22.Reset();
     rl2->SetFont(font);
 
+    rl2->Layer(0);
     rl2->DrawRectFilled(PD::fvec2(0, 0), PD::fvec2(400, 240), 0xff64c9fd);
     for (int i = 0; i < 44; i++)
       Append(rl2, i, PD::fvec2(0, 0), PD::fvec2(400, 240),
@@ -197,13 +238,18 @@ int main() {
     BottomScreenBeta(rl3);
 
     Stage::DoUpdate();
-    MsgHnd->Update(16.666666);
-    Stage::GetDrawDataTop()->DrawTextEx(PD::fvec2(395, 0), Clock22(),
-                                        gTheme.Text, LiTextFlags_AlignRight);
+    MsgHnd->Update(delta);
+    rl2->Merge(Stage::GetDrawDataTop());
+    rl2->pLayer++;
+    rl2->DrawTextEx(PD::fvec2(395, 1), Clock22(), gTheme.Text,
+                    LiTextFlags_AlignRight);
+    rl2->pLayer--;
+    rl2->Merge(MsgHnd->GetDrawList());
+    rl2->Optimize();
+    rl3->Merge(Stage::GetDrawDataBottom());
+    rl3->Optimize();
     PD::Ctr::AddDrawList(rl2, false);
     PD::Ctr::AddDrawList(rl3, true);
-    PD::Ctr::AddDrawList(Stage::GetDrawDataTop(), false);
-    PD::Ctr::AddDrawList(MsgHnd->GetDrawList(), false);
     // PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Hid::IsDown(PD::Hid::Key::Start)) {
       break;

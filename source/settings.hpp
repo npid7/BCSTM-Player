@@ -39,7 +39,9 @@ class Settings : public Stage {
 
   static TabEntry::Ref MakeEntry(const std::string& id, const std::string& val);
   TabEntry::Ref MakeLang();
+  TabEntry::Ref MakeCredits();
   TabEntry::Ref MakeThemes();
+  TabEntry::Ref MakeLicenseText(const std::string& path);
 
   /** THIS System of navigation is very memory inefficient btw */
   std::vector<TabEntry::Ref> pDL;
