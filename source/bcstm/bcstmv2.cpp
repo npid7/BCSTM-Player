@@ -217,6 +217,7 @@ void D7::BCSTM2::stream() {
 }
 
 void D7::BCSTM2::fill_buffers() {
+  PD::TT::Scope __s("Stream");
   for (unsigned int bufIndex = 0; bufIndex < buffer_count; ++bufIndex) {
     /*if (wave_buf[0][bufIndex].status != NDSP_WBUF_DONE) continue;
     if (channel_count == 2 && wave_buf[1][bufIndex].status != NDSP_WBUF_DONE)

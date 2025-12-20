@@ -156,6 +156,7 @@ void CTRFFDec::Stream() {
 }
 
 void CTRFFDec::pFillBuffers() {
+  PD::TT::Scope __s("Stream");
   auto encoding = pCurrentFile.pInfoBlock.StreamInfo.Encoding;
   for (PD::u32 buf_idx = 0; buf_idx < BufferCount; buf_idx++) {
     bool all_ready = true;

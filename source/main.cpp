@@ -1,4 +1,5 @@
 #include <bcstm_ctrl.hpp>
+#include <config.hpp>
 #include <filebrowser.hpp>
 #include <flex/flex.hpp>
 #include <inspector_view.hpp>
@@ -24,6 +25,8 @@
 
 D7::MsgHandler::Ref MsgHnd = nullptr;
 Theme gTheme;
+D7::Config pCfg;
+PD::UI7::Context::Ref ui7 = nullptr;
 
 float Offset(float x) {
   float y = cos(x) * 42;
@@ -49,11 +52,12 @@ void Append(PD::Li::DrawList::Ref l, int index, PD::fvec2 position,
 void BCSTM_Handler(BCSTM_Ctrl* ctrl) {
   ctrl->player = new D7::CTRFFDec;  // Stable
   while (true) {
+    PD::TT::Scope st("Thread");
     if (ctrl->pFileLoaded) {
       ctrl->player->Stream();
     }
     if (ctrl->pRequests.size() == 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
     } else {
       auto t = ctrl->pRequests.front();
       if (t.req == BCSTM_Ctrl::OpenFile) {
@@ -106,41 +110,85 @@ Settings::Ref Settings;
 BCSTM_Ctrl bcstm_ctrl;
 D7::Lang Lang;
 
-void BottomScreenBeta(PD::Li::DrawList::Ref l) {
-  l->DrawRectFilled(0, PD::fvec2(320, 240), gTheme.Background);
-  l->DrawRectFilled(5, PD::fvec2(310, 20), gTheme.ListOdd);
-  l->DrawRectFilled(7, PD::fvec2(306, 16), gTheme.Background);
-  float scale = 0.f;
-
-  if (bcstm_ctrl.player->GetTotal() != 0) {
-    scale = (float)bcstm_ctrl.player->GetCurrent() /
-            (float)bcstm_ctrl.player->GetTotal();
+class Progressbar : public PD::UI7::Container {
+ public:
+  /**
+   * Constructor for the Progresbar Object
+   */
+  Progressbar(float v) {
+    this->pVal = v;
+    SetSize(PD::fvec2(310, 20));
   }
-  l->DrawRectFilled(7, PD::fvec2(306 * scale, 16), gTheme.Progressbar);
-  l->DrawText(
-      PD::fvec2(7, 28),
-      std::format(
-          "Info:\n  Block Pos: {}/{}\n  Sample Rate: {}\n  Loop: {}\n  "
-          "Loop Start: "
-          "{}\n  Loop End: {}\n  Decoder: {}\n  ChannelMap: {:#b}\nOp: "
-          "{}\nCtx: {}\nMain: {}",
-          bcstm_ctrl.player->GetCurrent(), bcstm_ctrl.player->GetTotal(),
-          bcstm_ctrl.player->GetSampleRate(), bcstm_ctrl.player->IsLooping(),
-          bcstm_ctrl.player->GetLoopStart(), bcstm_ctrl.player->GetLoopEnd(),
-          bcstm_ctrl.player->GetName(), bcstm_ctrl.player->ActiveChannels(),
-          PD::Strings::FormatNanos(
-              PD::OS::GetTraceRef("Optimize")->GetProtocol()->GetAverage()),
-          PD::Strings::FormatNanos(
-              PD::OS::GetTraceRef("CtxUpdate")->GetProtocol()->GetAverage()),
-          PD::Strings::FormatNanos(
-              PD::OS::GetTraceRef("mainloop")->GetProtocol()->GetAverage())),
-      gTheme.Text);
+  ~Progressbar() = default;
+
+  PD_SHARED(Progressbar);
+
+  /**
+   * Override for the Rendering Handler
+   * @note This function is usally called by Menu::Update
+   * */
+  void Draw() override {
+    auto p = FinalPos();
+    list->DrawRectFilled(p, GetSize(), gTheme.ListOdd);
+    list->DrawRectFilled(p + PD::fvec2(2), GetSize() - 4, gTheme.Background);
+
+    list->DrawRectFilled(p + PD::fvec2(2),
+                         PD::fvec2((GetSize().x - 4) * pVal, GetSize().y - 4),
+                         gTheme.Progressbar);
+  }
+
+ private:
+  float pVal;
+};
+
+void BottomScreenBeta(PD::Li::DrawList::Ref l) {
+  if (ui7->BeginMenu(Lang.Get("CONTROLCENTER"),
+                     UI7MenuFlags_NoCollapse | UI7MenuFlags_NoMove |
+                         UI7MenuFlags_NoResize | UI7MenuFlags_Scrolling)) {
+    auto m = ui7->CurrentMenu();
+    float scale = 0.f;
+
+    if (bcstm_ctrl.player->GetTotal() != 0) {
+      scale = (float)bcstm_ctrl.player->GetCurrent() /
+              (float)bcstm_ctrl.player->GetTotal();
+    }
+    m->AddObject(Progressbar::New(scale));
+    if (m->Button(bcstm_ctrl.player->IsPlaying() ? "Pause" : "Play")) {
+      if (bcstm_ctrl.player->IsPlaying()) {
+        bcstm_ctrl.DoRequest(bcstm_ctrl.Pause);
+      } else {
+        bcstm_ctrl.DoRequest(bcstm_ctrl.Play);
+      }
+    }
+    m->SameLine();
+    if (m->Button("Stop")) {
+      bcstm_ctrl.DoRequest(bcstm_ctrl.Stop);
+    }
+    m->SeparatorText("Info");
+    m->Label("Block Pos: {}/{}", bcstm_ctrl.player->GetCurrent(),
+             bcstm_ctrl.player->GetTotal());
+    m->Label("Loop: {}", bcstm_ctrl.player->IsLooping());
+    m->Label("LoopStart/End: {}/{}", bcstm_ctrl.player->GetLoopStart(),
+             bcstm_ctrl.player->GetLoopEnd());
+    m->Label("Decoder: {}", bcstm_ctrl.player->GetName());
+    m->Label("Stream: {}",
+             PD::Strings::FormatNanos(
+                 PD::OS::GetTraceRef("Stream")->GetProtocol()->GetAverage()));
+    m->Label(
+        "Render: {}",
+        PD::Strings::FormatNanos(
+            PD::OS::GetTraceRef("CtxUpdate")->GetProtocol()->GetAverage()));
+    m->Label("Main: {}",
+             PD::Strings::FormatNanos(
+                 PD::OS::GetTraceRef("mainloop")->GetProtocol()->GetAverage()));
+    ui7->EndMenu();
+  }
 }
 
 std::string Clock22() {
   const time_t ut = time(0);
-  bool h24 = true;
-  bool ds = true;
+  bool h24 = pCfg.Get<bool>("clock_fmt24");
+  bool ds = pCfg.Get<bool>("clock_seconds");
   auto ts = localtime(&ut);
   if (!h24) {
     int hr = ts->tm_hour % 12;
@@ -183,12 +231,14 @@ void InitThemes() {
     off.close();
   }
   delete[] d;
-  gTheme.Load("sdmc:/3ds/BCSTM-Player/themes/default.json");
+  gTheme.Load("sdmc:/3ds/BCSTM-Player/themes/" +
+              pCfg.Get<std::string>("last_theme") + ".json");
 }
 
 int main() {
   PD::Ctr::EnableExceptionScreen();
   PD::Ctr::CreateContext();
+  pCfg.Load("sdmc:/3ds/BCSTM-Player/config.json");
   InitThemes();
   aptSetSleepAllowed(true);
   auto ret = ndspInit();
@@ -203,11 +253,15 @@ int main() {
   auto font = PD::Li::Font::New();
   font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
   MsgHnd = D7::MsgHandler::New(font);
-  try {
-    Lang.Load("romfs:/lang/" + PD::Ctr::GetSystemLanguage() + ".json");
-  } catch (const std::runtime_error& e) {
-    MsgHnd->Push("Lang Error:", e.what());
-    Lang.Load("romfs:/lang/en.json");
+  if (pCfg.Get<std::string>("last_lang") == "sys") {
+    try {
+      Lang.Load("romfs:/lang/" + PD::Ctr::GetSystemLanguage() + ".json");
+    } catch (const std::runtime_error& e) {
+      MsgHnd->Push("Lang Error:", e.what());
+      Lang.Load("romfs:/lang/en.json");
+    }
+  } else {
+    Lang.Load("romfs:/lang/" + pCfg.Get<std::string>("last_lang") + ".json");
   }
   auto rl2 = PD::Li::DrawList::New();
   auto rl3 = PD::Li::DrawList::New();
@@ -218,7 +272,10 @@ int main() {
   Settings = Settings::New(font);
   Stage::Goto(Filebrowser);
   std::thread bcstm_player(BCSTM_Handler, &bcstm_ctrl);
-
+  ui7 = PD::UI7::Context::New();
+  ui7->GetIO()->Font = font;
+  ui7->AddViewPort("VpBot", PD::ivec4(0, 0, 320, 240));
+  ui7->UseViewPort("VpBot");
   PD::Timer time;
   PD::Timer time22;
   double delta;
@@ -231,14 +288,20 @@ int main() {
     rl2->SetFont(font);
 
     rl2->Layer(0);
-    rl2->DrawRectFilled(PD::fvec2(0, 0), PD::fvec2(400, 240), 0xff64c9fd);
-    for (int i = 0; i < 44; i++)
-      Append(rl2, i, PD::fvec2(0, 0), PD::fvec2(400, 240),
-             (float)time.GetSeconds());
+    if (pCfg.Get<bool>("rd7tfbg")) {
+      rl2->DrawRectFilled(PD::fvec2(0, 0), PD::fvec2(400, 240), gTheme.HblBG0);
+      for (int i = 0; i < 44; i++)
+        Append(rl2, i, PD::fvec2(0, 0), PD::fvec2(400, 240),
+               (float)time.GetSeconds());
+    } else {
+      rl2->DrawRectFilled(PD::fvec2(0, 0), PD::fvec2(400, 240),
+                          gTheme.Background);
+    }
     BottomScreenBeta(rl3);
 
     Stage::DoUpdate();
     MsgHnd->Update(delta);
+    ui7->Update();
     rl2->Merge(Stage::GetDrawDataTop());
     rl2->pLayer++;
     rl2->DrawTextEx(PD::fvec2(395, 1), Clock22(), gTheme.Text,
@@ -249,8 +312,8 @@ int main() {
     rl3->Merge(Stage::GetDrawDataBottom());
     rl3->Optimize();
     PD::Ctr::AddDrawList(rl2, false);
-    PD::Ctr::AddDrawList(rl3, true);
-    // PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
+    PD::Ctr::AddDrawList(ui7->GetDrawData(), true);
+    //  PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Hid::IsDown(PD::Hid::Key::Start)) {
       break;
     }

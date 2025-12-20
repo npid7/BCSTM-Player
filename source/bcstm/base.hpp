@@ -43,6 +43,7 @@ class BCSTMPlayerBase {
   /** INFO */
   virtual bool IsLooping() { return false; }
   virtual bool IsLoaded() { return false; }
+  virtual bool IsPlaying() { return false; }
   virtual unsigned int GetLoopStart() { return 0; }
   virtual unsigned int GetLoopEnd() { return 0; }
   virtual unsigned int GetChannelCount() { return 0; }

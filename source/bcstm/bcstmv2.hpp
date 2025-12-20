@@ -57,6 +57,7 @@ class BCSTM2 : public BCSTMPlayerBase {
 
   bool IsLooping() { return this->is_looping; }
   bool IsLoaded() { return this->is_loaded; }
+  bool IsPlaying() { return !is_paused; }
   unsigned int GetLoopStart() { return this->loop_start; }
   unsigned int GetLoopEnd() { return this->loop_end; }
   unsigned int GetChannelCount() { return this->channel_count; }

@@ -1,6 +1,10 @@
 #include <bcstm_ctrl.hpp>
+#include <msg_handler.hpp>
+#include <pd_ctr_ext.hpp>
 #include <settings.hpp>
 #include <stages.hpp>
+
+extern D7::MsgHandler::Ref MsgHnd;
 
 void Settings::Update() {
   delta.Update();
@@ -118,6 +122,13 @@ void Settings::Update() {
       cursor.SetIndex(0);
     }
     if (pStack.empty()) {
+      if (pCfg.Updated()) {
+        try {
+          pCfg.Save("sdmc:/3ds/BCSTM-Player/config.json");
+        } catch (const std::runtime_error& e) {
+          MsgHnd->Push("Config Save Error", e.what());
+        }
+      }
       Back();
     } else {
       pDL = pStack.top();
@@ -184,19 +195,30 @@ Settings::TabEntry::Ref Settings::MakeCredits() {
 }
 
 Settings::TabEntry::Ref Settings::MakeLang() {
-  auto e = Settings::TabEntry::New();
-  std::vector<Settings::TabEntry::Ref> pData;
+  auto e = TabEntry::New();
+  std::vector<TabEntry::Ref> pData;
+  pData.push_back(TabEntry::New("System", "", [=, this](std::string& s) {
+    try {
+      Lang.Load("romfs:/lang/" + PD::Ctr::GetSystemLanguage() + ".json");
+    } catch (const std::runtime_error& e) {
+      Lang.Load("romfs:/lang/de.json");
+      MsgHnd->Push("Lang Error:", e.what());
+    }
+    pCfg.Set("last_lang", "sys");
+  }));
   for (auto& it : std::filesystem::directory_iterator("romfs:/lang")) {
     D7::Lang tmp;
     tmp.Load(it.path().string());
-    pData.push_back(Settings::TabEntry::New(
-        tmp.Id(), tmp.Name() + " - " + tmp.Author(), [=, this](std::string& s) {
-          Lang.Load(it.path().string());
-          Init();
-        }));
+    pData.push_back(TabEntry::New(tmp.Id(), tmp.Name() + " - " + tmp.Author(),
+                                  [=, this](std::string& s) {
+                                    Lang.Load(it.path().string());
+                                    pCfg.Set("last_lang", tmp.Id());
+                                    Init();
+                                  }));
   }
 
   e->First = Lang.Get("LANGUAGE");
+  e->Second = Lang.Name();
   e->SubData = pData;
   return e;
 }
@@ -207,11 +229,13 @@ Settings::TabEntry::Ref Settings::MakeThemes() {
   for (auto& it :
        std::filesystem::directory_iterator("sdmc:/3ds/BCSTM-Player/themes")) {
     pData.push_back(Settings::TabEntry::New(
-        it.path().filename().stem().string(), "",
-        [=, this](std::string& s) { gTheme.Load(it.path().string()); }));
+        it.path().filename().stem().string(), "", [=, this](std::string& s) {
+          gTheme.Load(it.path().string());
+          pCfg.Set("last_theme", it.path().filename().stem().string());
+        }));
   }
 
-  e->First = Lang.Get("THEMES");
+  e->First = Lang.Get("THEMES") + " (Beta)";
   e->SubData = pData;
   return e;
 }
@@ -248,6 +272,27 @@ Settings::TabEntry::Ref Settings::MakeLicenseText(const std::string& path) {
   return e;
 }
 
+Settings::TabEntry::Ref Settings::MakeClock() {
+  auto e = Settings::TabEntry::New();
+  std::vector<Settings::TabEntry::Ref> pData;
+  pData.push_back(TabEntry::New(
+      Lang.Get("24HRS"), std::format("{}", pCfg.Get<bool>("clock_fmt24")),
+      [=, this](std::string& s) {
+        pCfg.Set("clock_fmt24", !pCfg.Get<bool>("clock_fmt24"));
+        s = std::format("{}", pCfg.Get<bool>("clock_fmt24"));
+      }));
+  pData.push_back(TabEntry::New(
+      Lang.Get("SHOWSECONDS"),
+      std::format("{}", pCfg.Get<bool>("clock_seconds")),
+      [=, this](std::string& s) {
+        pCfg.Set("clock_seconds", !pCfg.Get<bool>("clock_seconds"));
+        s = std::format("{}", pCfg.Get<bool>("clock_seconds"));
+      }));
+  e->First = Lang.Get("CLOCK");
+  e->SubData = pData;
+  return e;
+}
+
 void Settings::Init() {
   List.clear();
   sp = 0;
@@ -265,6 +310,13 @@ void Settings::Init() {
       }));
   List.push_back(MakeLang());
   List.push_back(MakeThemes());
+  List.push_back(MakeClock());
+  List.push_back(TabEntry::New(
+      Lang.Get("RD7TFBG"), std::format("{}", pCfg.Get<bool>("rd7tfbg")),
+      [=, this](std::string& s) {
+        pCfg.Set("rd7tfbg", !pCfg.Get<bool>("rd7tfbg"));
+        s = std::format("{}", pCfg.Get<bool>("rd7tfbg"));
+      }));
   List.push_back(MakeCredits());
   List.push_back(MakeInfo());
   pDL = List;

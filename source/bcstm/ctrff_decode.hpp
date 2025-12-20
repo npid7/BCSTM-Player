@@ -27,6 +27,7 @@ class CTRFFDec : public BCSTMPlayerBase {
   /** INFO */
   inline bool IsLooping() { return pCurrentFile.IsLooping(); }
   inline bool IsLoaded() { return pIsLoaded; }
+  inline bool IsPlaying() { return !pIsPaused; }
   inline unsigned int GetLoopStart() { return pCurrentFile.GetLoopStart(); }
   inline unsigned int GetLoopEnd() { return pCurrentFile.GetLoopEnd(); }
   inline unsigned int GetChannelCount() {

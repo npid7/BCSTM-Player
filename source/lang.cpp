@@ -15,7 +15,7 @@ void D7::Lang::Load(const std::string& path) {
   iff.close();
   nlohmann::json js2 = js["keys"];
   for (auto& it : js2.items()) {
-    auto id = ID(it.key());
+    auto id = ID(PD::FNV1A32(it.key().c_str()));
     auto e = pDupeCheck.find(id);
     if (e != pDupeCheck.end()) {
       if (it.key() != e->second) {
@@ -23,7 +23,7 @@ void D7::Lang::Load(const std::string& path) {
                                  " have the same hash!");
       }
     }
-    pStrings[ID(it.key())] = it.value().get<std::string>();
+    pStrings[ID(PD::FNV1A32(it.key().c_str()))] = it.value().get<std::string>();
   }
   pDupeCheck.clear();
   pName = js["info"]["name"].get<std::string>();
@@ -36,5 +36,6 @@ const std::string& D7::Lang::Get(const ID& id) {
   if (s != pStrings.end()) {
     return s->second;
   }
+  pLangErr = id.GetName();
   return pLangErr;
 }

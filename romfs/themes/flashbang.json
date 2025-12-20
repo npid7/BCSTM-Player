@@ -1,0 +1,18 @@
+{
+   "colors": {
+      "Background": "#cccccc",
+      "Button": "#5555cccc",
+      "Footer": "#cccccc",
+      "HblBG0": "#fdc964",
+      "Header": "#cccccc",
+      "ListEven": "#bbbbbb88",
+      "ListOdd": "#cccccc88",
+      "Selector": "#5555cccc",
+      "Slider": "#999999",
+      "Progressbar": "#5555cc",
+      "Text": "#000000"
+   },
+   "info": {
+      "version": 0
+   }
+}
