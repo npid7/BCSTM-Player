@@ -70,6 +70,7 @@ class BCSTM2 : public BCSTMPlayerBase {
   unsigned int GetBlcokSize() const { return block_size; }
   unsigned int GetBlockSamples() const { return block_samples; }
   inline unsigned int ActiveChannels() const { return active_channels; }
+  const std::string GetFilePath() const { return m_file; }
 
   bool pBigEndian = false;
   std::fstream pFile;
@@ -98,6 +99,7 @@ class BCSTM2 : public BCSTMPlayerBase {
   static const int buffer_count = 20;
   static const int max_channels = 8;
 
+  std::string m_file;
   unsigned int current_time = 0;
   unsigned int last_time = 0;
 

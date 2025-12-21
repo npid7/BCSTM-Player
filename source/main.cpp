@@ -165,6 +165,10 @@ void BottomScreenBeta(PD::Li::DrawList::Ref l) {
       bcstm_ctrl.DoRequest(bcstm_ctrl.Stop);
     }
     m->SeparatorText("Info");
+    m->Label("{}{}", Lang.Get("PLAYING"),
+             std::filesystem::path(bcstm_ctrl.player->GetFilePath())
+                 .filename()
+                 .string());
     m->Label("Block Pos: {}/{}", bcstm_ctrl.player->GetCurrent(),
              bcstm_ctrl.player->GetTotal());
     m->Label("Loop: {}", bcstm_ctrl.player->IsLooping());
@@ -249,9 +253,9 @@ int main() {
         "Firmware\n\nThen "
         "Restart this App.");
   }
-  // auto font = PD::LoadSystemFont();
-  auto font = PD::Li::Font::New();
-  font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
+  auto font = PD::LoadSystemFont();
+  // auto font = PD::Li::Font::New();
+  // font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
   MsgHnd = D7::MsgHandler::New(font);
   if (pCfg.Get<std::string>("last_lang") == "sys") {
     try {
@@ -313,7 +317,6 @@ int main() {
     rl3->Optimize();
     PD::Ctr::AddDrawList(rl2, false);
     PD::Ctr::AddDrawList(ui7->GetDrawData(), true);
-    //  PD::Ctr::AddDrawList(Stage::GetDrawDataBottom(), true);
     if (PD::Hid::IsDown(PD::Hid::Key::Start)) {
       break;
     }

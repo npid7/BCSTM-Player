@@ -201,7 +201,7 @@ Settings::TabEntry::Ref Settings::MakeLang() {
     try {
       Lang.Load("romfs:/lang/" + PD::Ctr::GetSystemLanguage() + ".json");
     } catch (const std::runtime_error& e) {
-      Lang.Load("romfs:/lang/de.json");
+      Lang.Load("romfs:/lang/en.json");
       MsgHnd->Push("Lang Error:", e.what());
     }
     pCfg.Set("last_lang", "sys");

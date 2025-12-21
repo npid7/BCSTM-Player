@@ -46,11 +46,13 @@ class CTRFFDec : public BCSTMPlayerBase {
     return pCurrentFile.GetBlockSamples();
   }
   inline unsigned int ActiveChannels() const { return pActiveChannels; }
+  const std::string GetFilePath() const { return pFilePath; }
 
   void pFillBuffers();
 
   static constexpr int BufferCount = 20;
   ctrff::BCSTM pCurrentFile;
+  std::string pFilePath;
   bool pIsLoaded = false;
   bool pIsStreaming = false;
   bool pIsPaused = false;

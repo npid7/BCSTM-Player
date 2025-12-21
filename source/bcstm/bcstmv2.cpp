@@ -82,6 +82,7 @@ void D7::BCSTM2::LoadFile(const std::string& path) {
 
   pFile.seekg((data_offset + 0x20));
   is_loaded = true;
+  m_file = path;
 }
 
 void D7::BCSTM2::Stream() { this->stream(); }
@@ -188,6 +189,7 @@ void D7::BCSTM2::Stop() {
   is_looping = false;
   is_loaded = false;
   m_is_ending = false;
+  m_file = "";
   if (!is_streaming) return;
   is_streaming = false;
 }

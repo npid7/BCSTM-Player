@@ -20,6 +20,7 @@ void CTRFFDec::LoadFile(const std::string &path) {
     pBufferData[i].resize(BufferCount);
   }
   pIsLoaded = true;
+  pFilePath = path;
 }
 
 void CTRFFDec::Play() {
@@ -222,6 +223,7 @@ void CTRFFDec::CleanUp() {
   pIsEnding = false;
   pActiveChannels = 0;
   pCurrentBlock = 0;
+  pFilePath = "";
   pChannels.clear();
   pWaveBuf.clear();
   pBufferData.clear();

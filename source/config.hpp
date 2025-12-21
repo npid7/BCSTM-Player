@@ -94,7 +94,7 @@ class Config {
     Set("clock_fmt24", true);
     Set("clock_seconds", true);
     Set("last_theme", "default");
-    Set("last_lang", "en");
+    Set("last_lang", "sys");
     Set("rd7tfbg", true);
   }
 
