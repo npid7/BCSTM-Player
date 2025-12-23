@@ -38,6 +38,11 @@ class Config {
     return pData[id].get<T>();
   }
 
+  bool& GetBool(const ID& id) {
+    pUpdated = true;
+    return pData[id].get_ref<bool&>();
+  }
+
   // Explicitly use std::string for const char
   void Set(const ID& id, const char* t) {
     pData[id] = std::string(t);

@@ -64,7 +64,7 @@ Context* CreateContext() {
   osSetSpeedupEnable(true);
   romfsInit();
   gfxInitDefault();
-  C3D_Init(C3D_DEFAULT_CMDBUF_SIZE * 2);
+  C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
   NewCtx->Top =
       C3D_RenderTargetCreate(240, 400, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
   NewCtx->Bottom =
@@ -92,33 +92,27 @@ void DestroyContext(Context* ctx) {
 bool ContextUpdate() {
   PD::TT::Scope s("CtxUpdateSync");
   auto c = CheckContext();
-  PD::Hid::Update();
+  PD::Gfx::NewFrame();
   C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
   PD::TT::Scope s2("CtxUpdate");
   C3D_RenderTargetClear(c->Top, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_RenderTargetClear(c->Bottom, C3D_CLEAR_ALL, 0x00000000, 0);
   C3D_FrameDrawOn(c->Top);
-  PD::Gfx::SetViewPort(ivec2(400, 240));
-  PD::Gfx::NewFrame();
-  for (auto& it : c->DrawLists[0]) {
-    PD::Gfx::RenderDrawData(it->pDrawList);
-    it->Clear();
-  }
+  c->RenderCbTop();
   C3D_FrameDrawOn(c->Bottom);
-  PD::Gfx::SetViewPort(ivec2(320, 240));
-  for (auto& it : c->DrawLists[1]) {
-    PD::Gfx::RenderDrawData(it->pDrawList);
-    it->Clear();
-  }
+  c->RenderCbBot();
   C3D_FrameEnd(0);
-  c->DrawLists[0].clear();
-  c->DrawLists[1].clear();
-  return aptMainLoop() && !pExceptionCtx;
+  return !pExceptionCtx;
 }
 
-void AddDrawList(PD::Li::DrawList::Ref cmdl, bool bottom) {
+void AddRenderCallbackTop(RCb cb) {
   auto c = CheckContext();
-  c->DrawLists[bottom].push_back(cmdl);
+  c->RenderCbTop = cb;
+}
+
+void AddRenderCallbackBottom(RCb cb) {
+  auto c = CheckContext();
+  c->RenderCbBot = cb;
 }
 
 Context& GetContext() {

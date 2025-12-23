@@ -79,6 +79,8 @@ void MsgHandler::Push(const std::string& head, const std::string& Body) {
 }
 
 void MsgHandler::Update(float d) {
+  // Clear of course
+  pDrawData->Clear();
   // Loop over every element
   for (size_t i = 0; i < pElems.size(); i++) {
     // Delete every element that is oos

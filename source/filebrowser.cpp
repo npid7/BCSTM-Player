@@ -1,4 +1,3 @@
-#include <bcstm_ctrl.hpp>
 #include <filebrowser.hpp>
 #include <stages.hpp>
 
@@ -111,9 +110,9 @@ void FileMgr::Update() {
         sp = 0;
         ScanDir(FSE.Path);
       } else if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
-        bcstm_ctrl.DoRequest(bcstm_ctrl.Stop);
-        bcstm_ctrl.DoRequest(bcstm_ctrl.OpenFile, FSE.Path);
-        bcstm_ctrl.DoRequest(bcstm_ctrl.Play);
+        ctrl.DoRequest(ctrl.Stop);
+        ctrl.DoRequest(ctrl.OpenFile, FSE.Path);
+        ctrl.DoRequest(ctrl.Play);
       }
     }
 
@@ -135,7 +134,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (PD::Hid::IsDown(PD::Hid::Key::X)) {
+    /*if (PD::Hid::IsDown(PD::Hid::Key::X)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
         FileInspector->ReadFile(FSE.Path);
@@ -149,7 +148,7 @@ void FileMgr::Update() {
     if (PD::Hid::IsDown(PD::Hid::Key::Y)) {
       Settings->Init();
       Goto(Settings);
-    }
+    }*/
   }
 
   pShowHelp = PD::Hid::IsHeld(PD::Hid::Key::Select);

@@ -64,6 +64,11 @@
         "UPTFND": "Update available!",
         "CREDITS": "Credits",
         "SHOW_INFO": "Show Info",
-        "LICENSE": "License"
+        "LICENSE": "License",
+        "CREDIT_TOBID7": "Lead Developer, developer of palladium, ctrff.",
+        "CREDIT_DEVKITPRO": "libctru, citro3d",
+        "CREDIT_CHEUBLE": "The original author of the BCSTMV1 loading and player code. This is the basis still kinda used in BCSTMV2.",
+        "CREDIT_3DBREW": "Source of the BCSTM File Format Information to built ctrff and make nearly every encoding format playable.",
+        "CREDIT_CROZYNSKI": "Comic Neue Font"
     }
 }

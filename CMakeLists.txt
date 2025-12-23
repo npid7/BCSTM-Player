@@ -61,6 +61,7 @@ add_subdirectory(ctrff)
 
 # Set Executable and its sources
 add_executable(BCSTM-Player
+    source/app.cpp
     source/main.cpp
     source/pd_ctr_ext.cpp
     source/colors.cpp

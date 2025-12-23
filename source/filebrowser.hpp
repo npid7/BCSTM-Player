@@ -1,14 +1,17 @@
 #pragma once
 
 #include <bcstm/bcstmv2.hpp>
+#include <bcstm_ctrl.hpp>
 #include <cursor.hpp>
+#include <lang.hpp>
 #include <palladium>
 #include <stagemgr.hpp>
 #include <thread>
 
 class FileMgr : public Stage {
  public:
-  FileMgr(PD::Li::Font::Ref f) : Stage(f) {
+  FileMgr(PD::Li::Font::Ref f, D7::Lang& l, BCSTM_Ctrl& c)
+      : Stage(f), Lang(l), ctrl(c) {
     ScanDir("sdmc:/");
     PD::Image::Ref img = PD::Image::New("romfs:/gfx/folder_small.png");
     pIcnFolder =
@@ -43,6 +46,8 @@ class FileMgr : public Stage {
   PD::Li::Texture::Ref pIcnFolder = nullptr;
   PD::Li::Texture::Ref pIcnFile = nullptr;
   PD::Li::Texture::Ref pIcnAudio = nullptr;
+  D7::Lang& Lang;
+  BCSTM_Ctrl& ctrl;
   bool pShowHelp = false;
 
   static void SortList(std::vector<FSEntry>& l);
