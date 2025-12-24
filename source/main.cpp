@@ -61,35 +61,41 @@ class BCSTMPlayer : public D7::App {
       pCfg.Save("sdmc:/3ds/BCSTM-Player/config.json");
     }
     PD::Hid::Update();
-    ui7->UseViewPort("VpBot");
-    bool lc = pShowLicense;
-    bool* close_ptr = nullptr;
-    std::string title = Lang.Get("CONTROLCENTER");
-    if (pShowLicense) {
-      close_ptr = &pShowLicense;
-      title = Lang.Get("LICENSE");
-    } else if (pShowSettings) {
-      close_ptr = &pShowSettings;
-      title = Lang.Get("SETTINGS");
-    }
-    if (ui7->BeginMenu(title, pUI7Flags, close_ptr)) {
+    if (!pNoUI7) {
+      ui7->UseViewPort("VpBot");
+      bool lc = pShowLicense;
+      bool* close_ptr = nullptr;
+      std::string title = Lang.Get("CONTROLCENTER");
       if (pShowLicense) {
-        LicenseWindow(ui7->CurrentMenu());
-      } else if (!lc && pShowSettings) {
-        SettingsWindow(ui7->CurrentMenu());
-      } else {
-        MainWindow(ui7->CurrentMenu());
+        close_ptr = &pShowLicense;
+        title = Lang.Get("LICENSE");
+      } else if (pShowSettings) {
+        close_ptr = &pShowSettings;
+        title = Lang.Get("SETTINGS");
       }
-      ui7->EndMenu();
+      if (ui7->BeginMenu(title, pUI7Flags, close_ptr)) {
+        if (pShowLicense) {
+          LicenseWindow(ui7->CurrentMenu());
+        } else if (!lc && pShowSettings) {
+          SettingsWindow(ui7->CurrentMenu());
+        } else {
+          MainWindow(ui7->CurrentMenu());
+        }
+        ui7->EndMenu();
+      }
+      ui7->Update();
     }
-
-    ui7->Update();
+    // Top Screen
     DrawBG();
     Stage::DoUpdate();
     pTop->Merge(Stage::GetDrawDataTop());
+    pTop->Optimize();
     DrawClock();
     MsgHnd->Update(Delta());
     PD::TT::End("Main");
+    if (pAllowNoUI7) {
+      pNoUI7 = PD::Hid::IsHeld(PD::Hid::Key::L);
+    }
     if (!PD::Ctr::ContextUpdate() || PD::Hid::IsUp(PD::Hid::Key::Start)) {
       if (pCfg.Updated()) {
         pCfg.Save("sdmc:/3ds/BCSTM-Player/config.json");
@@ -107,6 +113,7 @@ class BCSTMPlayer : public D7::App {
 
   void RenderBot() {
     PD::Gfx::SetViewPort(PD::fvec2(320, 240));
+    ui7->GetDrawData()->Optimize();
     PD::Gfx::RenderDrawData(ui7->GetDrawData()->Data());
   }
 
@@ -188,6 +195,11 @@ class BCSTMPlayer : public D7::App {
       m->Label("Exceptions: {}", D7::Cxx::ExceptionsEnabled());
       m->EndTreeNode();
     }
+    if (m->BeginTreeNode(Lang.Get("DEVELOPER"))) {
+      m->Checkbox(Lang.Get("SHOWDEBUG"), pDebugDelta);
+      m->Checkbox(Lang.Get("ALLOWNOUI7"), pAllowNoUI7);
+      m->EndTreeNode();
+    }
   }
 
   void LicenseWindow(PD::UI7::Menu::Ref m) { m->Label(pLicenseText); }
@@ -260,7 +272,13 @@ class BCSTMPlayer : public D7::App {
                           ts->tm_hour >= 12 ? "PM" : "AM");
       }
     }
-    pTop->DrawTextEx(PD::fvec2(395, 1), str, pTheme.Text,
+    std::string str2;
+    if (pDebugDelta) {
+      str2 = std::format(
+          "{} ", PD::Strings::FormatNanos(
+                     PD::OS::GetTraceRef("Main")->GetProtocol()->GetAverage()));
+    }
+    pTop->DrawTextEx(PD::fvec2(395, 1), str2 + str, pTheme.Text,
                      LiTextFlags_AlignRight);
   }
 
@@ -404,6 +422,9 @@ class BCSTMPlayer : public D7::App {
   PD::UI7::Context::Ref ui7 = nullptr;
   bool pShowSettings = false;
   bool pShowLicense = false;
+  bool pDebugDelta = false;
+  bool pNoUI7 = false;
+  bool pAllowNoUI7 = false;
   std::vector<std::string> pLanguages;
   std::string pLicenseText;
   const UI7MenuFlags pUI7Flags = UI7MenuFlags_NoCollapse | UI7MenuFlags_NoMove |

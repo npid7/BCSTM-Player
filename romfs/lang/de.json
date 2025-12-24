@@ -48,7 +48,7 @@
         "24HRS": "24 Stunden",
         "SHOWSECONDS": "Zeige Sekunden",
         "APPEARANCE": "Darstellung: ",
-        "DEVELOPER": "Entwickler: ",
+        "DEVELOPER": "Entwickler",
         "SHOWTITLEOPT": "Zeige Titelverwaltung",
         "UPDATER": "Updater: ",
         "AUTOSEARCHUPDATE": "Suche Automatisch nach Updates",
@@ -73,6 +73,7 @@
         "DECODER": "Dekodierer",
         "CHANNEL_SUPPORT": "Unterstützte Kanäle",
         "FILE_SUPPORT": "Unterstützte Dateien",
-        "ENCODING_SUPPORT": "Unterstützte Formate"
+        "ENCODING_SUPPORT": "Unterstützte Formate",
+        "SHOWDEBUG": "Zeige Debuginformationen"
     }
 }

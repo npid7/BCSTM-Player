@@ -6,6 +6,7 @@ namespace D7 {
 void App::Run() {
   pLast = PD::OS::GetNanoTime();
   while (aptMainLoop() && !pExit) {
+    PD::TT::Scope st("App");
     PD::u64 c = PD::OS::GetNanoTime();
     pDelta = static_cast<double>(static_cast<double>(c) -
                                  static_cast<double>(pLast)) *
