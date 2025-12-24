@@ -69,6 +69,10 @@
         "CREDIT_DEVKITPRO": "libctru, citro3d",
         "CREDIT_CHEUBLE": "Enteickler des originalen BCSTMV1 Dateilade, Dekodier und Abspielcodes. Dieser Code findet sich immernoch teilweise in BCSTMV2 wieder.",
         "CREDIT_3DBREW": "Informationsquelle für das BCSTM Format, um ctrff zu entwickeln und fast alle Encodingformate abspielbar zu machen.",
-        "CREDIT_CROZYNSKI": "Comic Neue Schriftart"
+        "CREDIT_CROZYNSKI": "Comic Neue Schriftart",
+        "DECODER": "Dekodierer",
+        "CHANNEL_SUPPORT": "Unterstützte Kanäle",
+        "FILE_SUPPORT": "Unterstützte Dateien",
+        "ENCODING_SUPPORT": "Unterstützte Formate"
     }
 }

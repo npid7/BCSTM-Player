@@ -29,7 +29,7 @@ class Context {
   }
 
   Flex::Button& Button(const std::string& name) {
-    auto btn = Button::New();
+    auto btn = Button::New(nullptr);
     btn->pName = name;
     pObjects.push_back(btn);
     return *(btn.get());

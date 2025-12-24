@@ -10,13 +10,6 @@
 #include <stagemgr.hpp>
 #include <thread>
 
-D7::MsgHandler::Ref MsgHnd = nullptr;
-Theme gTheme;
-D7::Config pCfg;
-D7::Lang Lang;
-BCSTM_Ctrl bcstm_ctrl;
-PD::UI7::Context::Ref ui7 = nullptr;
-
 class BCSTMPlayer : public D7::App {
  public:
   BCSTMPlayer() {
@@ -32,6 +25,7 @@ class BCSTMPlayer : public D7::App {
           "Restart this App.");
     }
     pCfg.Load("sdmc:/3ds/BCSTM-Player/config.json");
+    InitThemes();
     Font = PD::Li::Font::New();
     Font->LoadTTF("romfs:/fonts/ComicNeue.ttf");
     MsgHnd = D7::MsgHandler::New(Font);
@@ -43,9 +37,10 @@ class BCSTMPlayer : public D7::App {
     ui7->AddViewPort("VpBot", PD::ivec4(0, 0, 320, 240));
     pFileMgr = FileMgr::New(Font, Lang, ctrl);
     pFileMgr->ScanDir("sdmc:/");
+    Stage::SetTheme(pTheme);
+    Stage::Goto(pFileMgr);
     LoadLanguage();
     bcstm_loop = std::thread(&BCSTMPlayer::BcstmLoop, this, &ctrl);
-    // ctrl.DoRequest(ctrl.OpenFile, "sdmc:/00kart7/IGYEIH.bcstm");
   }
   ~BCSTMPlayer() {
     ctrl.DoRequest(ctrl.KillThread);
@@ -68,68 +63,30 @@ class BCSTMPlayer : public D7::App {
     PD::Hid::Update();
     ui7->UseViewPort("VpBot");
     bool lc = pShowLicense;
+    bool* close_ptr = nullptr;
+    std::string title = Lang.Get("CONTROLCENTER");
     if (pShowLicense) {
-      LicenseWindow();
-    } else if (!lc) {
-      SettingsWindow();
+      close_ptr = &pShowLicense;
+      title = Lang.Get("LICENSE");
+    } else if (pShowSettings) {
+      close_ptr = &pShowSettings;
+      title = Lang.Get("SETTINGS");
     }
-    if (!pShowSettings) {
-      if (ui7->BeginMenu(Lang.Get("CONTROLCENTER"), pUI7Flags)) {
-        auto m = ui7->CurrentMenu();
-        if (m->Button(Lang.Get("SETTINGS"))) {
-          pShowSettings = true;
-        }
-        float scale = 0.f;
-
-        if (ctrl.player->GetTotal() != 0) {
-          scale =
-              (float)ctrl.player->GetCurrent() / (float)ctrl.player->GetTotal();
-        }
-        m->AddObject(Progressbar::New(scale));
-        if (m->Button(ctrl.player->IsPlaying() ? "Pause" : "Play")) {
-          if (ctrl.player->IsPlaying()) {
-            ctrl.DoRequest(ctrl.Pause);
-          } else {
-            ctrl.DoRequest(ctrl.Play);
-          }
-        }
-        m->SameLine();
-        if (m->Button("Stop")) {
-          ctrl.DoRequest(ctrl.Stop);
-        }
-        m->SeparatorText("Info");
-        m->Label("{}{}", Lang.Get("PLAYING"),
-                 std::filesystem::path(ctrl.player->GetFilePath())
-                     .filename()
-                     .string());
-        m->Label("Block Pos: {}/{}", ctrl.player->GetCurrent(),
-                 ctrl.player->GetTotal());
-        m->Label("Loop: {}", ctrl.player->IsLooping());
-        m->Label("LoopStart/End: {}/{}", ctrl.player->GetLoopStart(),
-                 ctrl.player->GetLoopEnd());
-        m->Label("Decoder: {}", ctrl.player->GetName());
-        m->Label(
-            "Stream: {}",
-            PD::Strings::FormatNanos(
-                PD::OS::GetTraceRef("Thread")->GetProtocol()->GetAverage()));
-        m->Label(
-            "Render: {}",
-            PD::Strings::FormatNanos(
-                PD::OS::GetTraceRef("CtxUpdate")->GetProtocol()->GetAverage()));
-        m->Label("Main: {}",
-                 PD::Strings::FormatNanos(
-                     PD::OS::GetTraceRef("Main")->GetProtocol()->GetAverage()));
-        ui7->EndMenu();
+    if (ui7->BeginMenu(title, pUI7Flags, close_ptr)) {
+      if (pShowLicense) {
+        LicenseWindow(ui7->CurrentMenu());
+      } else if (!lc && pShowSettings) {
+        SettingsWindow(ui7->CurrentMenu());
+      } else {
+        MainWindow(ui7->CurrentMenu());
       }
+      ui7->EndMenu();
     }
+
     ui7->Update();
     DrawBG();
-    pFileMgr->Update();
-    pFileMgr->Top->Update();
-    pFileMgr->Bottom->Update();
-    pTop->Merge(pFileMgr->GetDrawDataTop());
-    pFileMgr->Top->pDrawList->Clear();
-    pFileMgr->Bottom->pDrawList->Clear();
+    Stage::DoUpdate();
+    pTop->Merge(Stage::GetDrawDataTop());
     DrawClock();
     MsgHnd->Update(Delta());
     PD::TT::End("Main");
@@ -171,66 +128,111 @@ class BCSTMPlayer : public D7::App {
     }
   }
 
-  void SettingsWindow() {
-    if (ui7->BeginMenu(Lang.Get("SETTINGS"), pUI7Flags, &pShowSettings)) {
-      auto m = ui7->CurrentMenu();
-      m->SeparatorText("UI");
-      m->Checkbox(Lang.Get("RD7TFBG"), pCfg.GetBool("rd7tfbg"));
-      m->SeparatorText(Lang.Get("CLOCK"));
-      m->Checkbox(Lang.Get("24HRS"), pCfg.GetBool("clock_fmt24"));
-      m->Checkbox(Lang.Get("SHOWSECONDS"), pCfg.GetBool("clock_seconds"));
-      if (m->BeginTreeNode(Lang.Get("LANGUAGE"))) {
-        for (auto& it : pLanguages) {
-          if (m->Button(it)) {
-            pCfg.Set("last_lang", it);
-            LoadLanguage();
-          }
+  void SettingsWindow(PD::UI7::Menu::Ref m) {
+    m->SeparatorText("UI");
+    m->Checkbox(Lang.Get("RD7TFBG"), pCfg.GetBool("rd7tfbg"));
+    m->SeparatorText(Lang.Get("CLOCK"));
+    m->Checkbox(Lang.Get("24HRS"), pCfg.GetBool("clock_fmt24"));
+    m->Checkbox(Lang.Get("SHOWSECONDS"), pCfg.GetBool("clock_seconds"));
+    m->SeparatorText(Lang.Get("DECODER"));
+    m->Label("{}: {}", Lang.Get("Decoder"), ctrl.player->GetName());
+    m->Label("{}: {}", Lang.Get("CHANNEL_SUPPORT"),
+             ctrl.player->FeatureChannels(ctrl.player->pFeatures));
+    m->Label("{}: {}", Lang.Get("FILE_SUPPORT"),
+             ctrl.player->FeatureFiles(ctrl.player->pFeatures));
+    m->Label("{}: {}", Lang.Get("ENCODING_SUPPORT"),
+             ctrl.player->FeatureEncoding(ctrl.player->pFeatures));
+    if (m->Button(ctrl.player->GetName() == "CTRFFDec" ? "BCSTMV2 (Legacy)"
+                                                       : "CTRFFDec")) {
+      ctrl.DoRequest(ctrl.SwitchDec);
+    }
+    if (m->BeginTreeNode(Lang.Get("LANGUAGE"))) {
+      for (auto& it : pLanguages) {
+        if (m->Button(it)) {
+          pCfg.Set("last_lang", it);
+          LoadLanguage();
         }
+      }
 
-        m->EndTreeNode();
+      m->EndTreeNode();
+    }
+    if (m->BeginTreeNode(Lang.Get("CREDITS"))) {
+      m->Label("tobid7");
+      m->Label(Lang.Get("CREDIT_TOBID7"));
+      m->Separator();
+      m->Label("devkitpro");
+      m->Label(Lang.Get("CREDIT_DEVKITPRO"));
+      m->Separator();
+      m->Label("cheuble");
+      m->Label(Lang.Get("CREDIT_CHEUBLE"));
+      m->Separator();
+      m->Label("3DBrew");
+      m->Label(Lang.Get("CREDIT_3DBREW"));
+      m->Separator();
+      m->Label("crozynski");
+      m->Label(Lang.Get("CREDIT_CROZYNSKI"));
+      if (m->Button("Show License")) {
+        pLicenseText = pParseLicense("romfs:/license/ComicNeue.txt");
+        pShowLicense = true;
       }
-      if (m->BeginTreeNode(Lang.Get("CREDITS"))) {
-        m->Label("tobid7");
-        m->Label(Lang.Get("CREDIT_TOBID7"));
-        m->Separator();
-        m->Label("devkitpro");
-        m->Label(Lang.Get("CREDIT_DEVKITPRO"));
-        m->Separator();
-        m->Label("cheuble");
-        m->Label(Lang.Get("CREDIT_CHEUBLE"));
-        m->Separator();
-        m->Label("3DBrew");
-        m->Label(Lang.Get("CREDIT_3DBREW"));
-        m->Separator();
-        m->Label("crozynski");
-        m->Label(Lang.Get("CREDIT_CROZYNSKI"));
-        if (m->Button("Show License")) {
-          pLicenseText = pParseLicense("romfs:/license/ComicNeue.txt");
-          pShowLicense = true;
-        }
-        m->EndTreeNode();
-      }
-      if (m->BeginTreeNode(Lang.Get("SHOW_INFO"))) {
-        m->Label("Version: {}", VERSION);
-        m->Label("Commit: {}", GIT_COMMIT);
-        m->Label("Branch: {}", GIT_BRANCH);
-        m->Label("C++: {} ({}-{})", (__cplusplus / 100) % 100,
-                 __cplusplus / 100, __cplusplus % 100);
-        m->Label("Compiler: {}", PD::Strings::GetCompilerVersion());
-        m->Label("RTTI: {}", D7::Cxx::RTTIEnabled());
-        m->Label("Exceptions: {}", D7::Cxx::ExceptionsEnabled());
-        m->EndTreeNode();
-      }
-      ui7->EndMenu();
+      m->EndTreeNode();
+    }
+    if (m->BeginTreeNode(Lang.Get("SHOW_INFO"))) {
+      m->Label("Version: {}", VERSION);
+      m->Label("Commit: {}", GIT_COMMIT);
+      m->Label("Branch: {}", GIT_BRANCH);
+      m->Label("C++: {} ({}-{})", (__cplusplus / 100) % 100, __cplusplus / 100,
+               __cplusplus % 100);
+      m->Label("Compiler: {}", PD::Strings::GetCompilerVersion());
+      m->Label("RTTI: {}", D7::Cxx::RTTIEnabled());
+      m->Label("Exceptions: {}", D7::Cxx::ExceptionsEnabled());
+      m->EndTreeNode();
     }
   }
 
-  void LicenseWindow() {
-    if (ui7->BeginMenu(Lang.Get("LICENSE"), pUI7Flags, &pShowLicense)) {
-      auto m = ui7->CurrentMenu();
-      m->Label(pLicenseText);
-      ui7->EndMenu();
+  void LicenseWindow(PD::UI7::Menu::Ref m) { m->Label(pLicenseText); }
+
+  void MainWindow(PD::UI7::Menu::Ref m) {
+    if (m->Button(Lang.Get("SETTINGS"))) {
+      pShowSettings = true;
     }
+    float scale = 0.f;
+
+    if (ctrl.player->GetTotal() != 0) {
+      scale = (float)ctrl.player->GetCurrent() / (float)ctrl.player->GetTotal();
+    }
+    m->AddObject(Progressbar::New(scale));
+    if (m->Button(ctrl.player->IsPlaying() ? "Pause" : "Play")) {
+      if (ctrl.player->IsPlaying()) {
+        ctrl.DoRequest(ctrl.Pause);
+      } else {
+        ctrl.DoRequest(ctrl.Play);
+      }
+    }
+    m->SameLine();
+    if (m->Button("Stop")) {
+      ctrl.DoRequest(ctrl.Stop);
+    }
+    m->SeparatorText("Info");
+    m->Label(
+        "{}{}", Lang.Get("PLAYING"),
+        std::filesystem::path(ctrl.player->GetFilePath()).filename().string());
+    m->Label("Block Pos: {}/{}", ctrl.player->GetCurrent(),
+             ctrl.player->GetTotal());
+    m->Label("Loop: {}", ctrl.player->IsLooping());
+    m->Label("LoopStart/End: {}/{}", ctrl.player->GetLoopStart(),
+             ctrl.player->GetLoopEnd());
+    m->Label("Decoder: {}", ctrl.player->GetName());
+    m->Label("Stream: {}",
+             PD::Strings::FormatNanos(
+                 PD::OS::GetTraceRef("Thread")->GetProtocol()->GetAverage()));
+    m->Label(
+        "Render: {}",
+        PD::Strings::FormatNanos(
+            PD::OS::GetTraceRef("CtxUpdate")->GetProtocol()->GetAverage()));
+    m->Label("Main: {}",
+             PD::Strings::FormatNanos(
+                 PD::OS::GetTraceRef("Main")->GetProtocol()->GetAverage()));
   }
 
   void DrawClock() {
@@ -258,7 +260,7 @@ class BCSTMPlayer : public D7::App {
                           ts->tm_hour >= 12 ? "PM" : "AM");
       }
     }
-    pTop->DrawTextEx(PD::fvec2(395, 2), str, pTheme.Text,
+    pTop->DrawTextEx(PD::fvec2(395, 1), str, pTheme.Text,
                      LiTextFlags_AlignRight);
   }
 
@@ -270,7 +272,7 @@ class BCSTMPlayer : public D7::App {
         pAppend(pTop, i, PD::fvec2(0, 0), PD::fvec2(400, 240), Time());
     } else {
       pTop->DrawRectFilled(PD::fvec2(0, 0), PD::fvec2(400, 240),
-                           gTheme.Background);
+                           pTheme.Background);
     }
   }
 
@@ -324,6 +326,35 @@ class BCSTMPlayer : public D7::App {
         ctrl->pRequests.pop_front();
       }
     }
+  }
+
+  void InitThemes() {
+    std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
+    u8* d = new u8[1024];
+    for (auto& it : std::filesystem::directory_iterator("romfs:/themes/")) {
+      auto p = "sdmc:/3ds/BCSTM-Player/themes/" + it.path().filename().string();
+      if (std::filesystem::exists(p)) {
+        continue;
+      }
+      std::ifstream iff(it.path().string(), std::ios::binary);
+      std::ofstream off(p, std::ios::binary);
+
+      while (true) {
+        iff.read((char*)d, 1024);
+        size_t rb = iff.gcount();
+        if (rb) {
+          off.write((const char*)d, rb);
+        }
+        if (rb != 1024) {
+          break;
+        }
+      }
+      iff.close();
+      off.close();
+    }
+    delete[] d;
+    pTheme.Load("sdmc:/3ds/BCSTM-Player/themes/" +
+                pCfg.Get<std::string>("last_theme") + ".json");
   }
 
  private:

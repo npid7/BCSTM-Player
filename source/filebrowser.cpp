@@ -10,7 +10,7 @@ void FileMgr::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(0, 18 + 17 * i))
         .SetSize(PD::fvec2(400, 17))
-        .SetColor(((i % 2) == 0) ? gTheme.ListEven : gTheme.ListOdd);
+        .SetColor(((i % 2) == 0) ? GetTheme().ListEven : GetTheme().ListOdd);
   }
   if (pShowHelp) {
     Top->Text(
@@ -21,12 +21,12 @@ void FileMgr::Update() {
            "BCSTM File\nB -> Go Back\nX -> Open .bcstm File in File "
            "Inspector\nStart -> Exit App")
         .SetPos(PD::fvec2(5, 18))
-        .SetColor(gTheme.Text);
+        .SetColor(GetTheme().Text);
   } else {
     Top->Rect()
         .SetPos(cursor)
         .SetSize(PD::fvec2(400, 17))
-        .SetColor(gTheme.Selector);
+        .SetColor(GetTheme().Selector);
     for (int i = 0; i < int(list.size() > 12 ? 12 : list.size()); i++) {
       auto tmp = std::filesystem::path(list[sp + i].Path);
       if (!tmp.extension().compare(".bcstm")) {
@@ -37,18 +37,18 @@ void FileMgr::Update() {
       }
       Top->Text(list[sp + i].Name)
           .SetPos(PD::fvec2(21, 18 + 17 * i))
-          .SetColor(gTheme.Text);
+          .SetColor(GetTheme().Text);
     }
   }
-  Top->Rect().SetColor(gTheme.Header).SetPos(0).SetSize(PD::fvec2(400, 18));
+  Top->Rect().SetColor(GetTheme().Header).SetPos(0).SetSize(PD::fvec2(400, 18));
   Top->Text(Lang.Get("HEAD_FILEMANAGER"))
       .SetPos(PD::fvec2(5, 1))
-      .SetColor(gTheme.Text);
+      .SetColor(GetTheme().Text);
   Top->Rect()
       .SetPos(PD::fvec2(0, 222))
       .SetSize(PD::fvec2(400, 18))
-      .SetColor(gTheme.Footer);
-  Top->Text(cPath).SetPos(PD::fvec2(5, 223)).SetColor(gTheme.Text);
+      .SetColor(GetTheme().Footer);
+  Top->Text(cPath).SetPos(PD::fvec2(5, 223)).SetColor(GetTheme().Text);
   if (list.size() > 12) {
     float rect_h = (12.f / (float)list.size()) * 204.f;
     /** Make sure the rect is still visible */
@@ -58,7 +58,7 @@ void FileMgr::Update() {
     Top->Rect()
         .SetPos(PD::fvec2(396, rect_pos))
         .SetSize(PD::fvec2(4, rect_h))
-        .SetColor(gTheme.Slider);
+        .SetColor(GetTheme().Slider);
   }
   if (!pShowHelp) {
     if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
@@ -134,21 +134,19 @@ void FileMgr::Update() {
       }
     }
 
-    /*if (PD::Hid::IsDown(PD::Hid::Key::X)) {
+    if (PD::Hid::IsDown(PD::Hid::Key::X)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
+        // THe hacky way
+        auto FileInspector = Inspector::New(this->Top->pFont);
         FileInspector->ReadFile(FSE.Path);
         Goto(FileInspector);
       } else if (FSE.Name.find(".bcwav") != FSE.Name.npos) {
+        auto FileInspectorBCWAV = InspectorBCWAV::New(this->Top->pFont);
         FileInspectorBCWAV->ReadFile(FSE.Path);
         Goto(FileInspectorBCWAV);
       }
     }
-
-    if (PD::Hid::IsDown(PD::Hid::Key::Y)) {
-      Settings->Init();
-      Goto(Settings);
-    }*/
   }
 
   pShowHelp = PD::Hid::IsHeld(PD::Hid::Key::Select);

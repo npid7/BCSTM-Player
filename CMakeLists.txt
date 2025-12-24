@@ -69,11 +69,8 @@ add_executable(BCSTM-Player
     source/inspector_view.cpp
     source/inspector_view_bcwav.cpp
     source/msg_handler.cpp
-    source/settings.cpp
     source/stagemgr.cpp
     source/lang.cpp
-    #ource/app.cpp
-    #source/config.cpp
 
     source/bcstm/bcstmv2.cpp
     source/bcstm/ctrff_decode.cpp

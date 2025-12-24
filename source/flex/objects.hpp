@@ -9,8 +9,8 @@ namespace PD {
 namespace Flex {
 class Rect : public Container {
  public:
-  Rect() {}
-  Rect(fvec2 p, fvec2 s, u32 clr) {
+  Rect() : Container(nullptr) {}
+  Rect(fvec2 p, fvec2 s, u32 clr) : Container(nullptr) {
     pPos = p;
     pSize = s;
     pColor = clr;
@@ -44,7 +44,7 @@ class Rect : public Container {
 
 class Triangle : public Container {
  public:
-  Triangle() {}
+  Triangle() : Container(nullptr) {}
   ~Triangle() = default;
   PD_SHARED(Triangle)
 
@@ -80,7 +80,7 @@ class Triangle : public Container {
 
 class Button : public Container {
  public:
-  Button() {}
+  Button(Theme* t) : Container(t) {}
   ~Button() {}
   PD_SHARED(Button)
 
@@ -98,7 +98,7 @@ class Button : public Container {
 
 class Text : public Container {
  public:
-  Text() {}
+  Text() : Container(nullptr) {}
   ~Text() = default;
   PD_SHARED(Text)
 
@@ -134,7 +134,7 @@ class Text : public Container {
 
 class Image : public Container {
  public:
-  Image() {}
+  Image() : Container(nullptr) {}
   ~Image() = default;
   PD_SHARED(Image)
 

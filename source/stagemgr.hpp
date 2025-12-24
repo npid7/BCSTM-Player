@@ -32,6 +32,9 @@ class Stage {
   static PD::Li::DrawList::Ref GetDrawDataBottom() {
     return pStages.top()->Bottom->pDrawList;
   }
+  static void SetTheme(Theme& t) { pTheme = &t; }
+  static Theme& GetTheme() { return *pTheme; }
 
   static std::stack<Stage::Ref> pStages;
+  static Theme* pTheme;
 };
