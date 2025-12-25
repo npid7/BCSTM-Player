@@ -145,7 +145,7 @@ if(MAKEROM AND BANNERTOOL)
         -banner "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bnr"
         -icon "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.smdh"
         -logo ${APP_LOGO} -DAPP_ROMFS="${APP_ROMFS}"
-        -major 1 -minor 0 -micro 0
+        -major 2 -minor 0 -micro 0
         -DAPP_VERSION_MAJOR=1
         DEPENDS ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.smdh
         COMMENT "Creating Cia file..."
