@@ -74,6 +74,7 @@
         "CHANNEL_SUPPORT": "Unterstützte Kanäle",
         "FILE_SUPPORT": "Unterstützte Dateien",
         "ENCODING_SUPPORT": "Unterstützte Formate",
-        "SHOWDEBUG": "Zeige Debuginformationen"
+        "SHOWDEBUG": "Zeige Debuginformationen",
+        "ALLOWNOUI7": "Erlaube UI7 Deaktivierung"
     }
 }

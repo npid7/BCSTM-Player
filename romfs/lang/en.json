@@ -74,6 +74,7 @@
         "CHANNEL_SUPPORT": "Channel Support",
         "FILE_SUPPORT": "File Support",
         "ENCODING_SUPPORT": "Encoding Support",
-        "SHOWDEBUG": "Show Debuginfo"
+        "SHOWDEBUG": "Show Debuginfo",
+        "ALLOWNOUI7": "Allow UI7 Disabeling"
     }
 }

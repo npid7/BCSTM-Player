@@ -17,6 +17,7 @@ class BCSTMPlayer : public D7::App {
     PD::Ctr::AddRenderCallbackTop([=, this]() { RenderTop(); });
     PD::Ctr::AddRenderCallbackBottom([=, this]() { RenderBot(); });
     auto ret = ndspInit();
+    std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
     if (R_FAILED(ret)) {
       throw std::runtime_error(
           "ndspfirm.cdc was not found!\n\nNote: You can dump the file "
@@ -347,7 +348,6 @@ class BCSTMPlayer : public D7::App {
   }
 
   void InitThemes() {
-    std::filesystem::create_directories("sdmc:/3ds/BCSTM-Player/themes");
     u8* d = new u8[1024];
     for (auto& it : std::filesystem::directory_iterator("romfs:/themes/")) {
       auto p = "sdmc:/3ds/BCSTM-Player/themes/" + it.path().filename().string();
