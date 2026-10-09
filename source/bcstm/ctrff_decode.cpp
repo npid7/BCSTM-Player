@@ -36,7 +36,7 @@ void CTRFFDec::Play() {
   }
   // Gather Encoding and create ndsp config (default is the old adpcm only cfg)
   auto encoding = pCurrentFile.pInfoBlock.StreamInfo.Encoding;
-  int ndspCfg = NDSP_3D_SURROUND_PREPROCESSED;
+  int ndspCfg = 0;
 
   // Setup PCM Format with Channel Num
   if (encoding == ctrff::BCSTM::PCM8) {

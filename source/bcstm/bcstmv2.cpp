@@ -110,8 +110,7 @@ void D7::BCSTM2::Play() {
       ndspChnWaveBufClear(channel[i]);
     }
     static float mix[12];
-    ndspChnSetFormat(channel[i],
-                     NDSP_FORMAT_ADPCM | NDSP_3D_SURROUND_PREPROCESSED);
+    ndspChnSetFormat(channel[i], NDSP_FORMAT_ADPCM);
     ndspChnSetRate(channel[i], sample_rate);
 
     /** Make sure they are 0 */
