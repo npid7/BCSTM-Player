@@ -4,8 +4,8 @@
 namespace D7 {
 void CTRFFDec::LoadFile(const std::string &path) {
   CleanUp();
-  pCurrentFile.LoadFile(path);
-  if (pCurrentFile.pInfoBlock.StreamInfo.Encoding == ctrff::BCSTM::IMA_ADPCM) {
+  pCurrentFile.Load(path);
+  if (pCurrentFile.pInfoBlock.StreamInfo.Encoding == ctrff::BCSTM::Encoding::IMA_ADPCM) {
     throw std::runtime_error(
         "[CTRFFDEC]: Format IMA ADPCM is not supported by ndsp!");
   }
@@ -39,11 +39,11 @@ void CTRFFDec::Play() {
   int ndspCfg = NDSP_3D_SURROUND_PREPROCESSED;
 
   // Setup PCM Format with Channel Num
-  if (encoding == ctrff::BCSTM::PCM8) {
+  if (encoding == ctrff::BCSTM::Encoding::PCM8) {
     ndspCfg |= NDSP_FORMAT_PCM8;
-  } else if (encoding == ctrff::BCSTM::PCM16) {
+  } else if (encoding == ctrff::BCSTM::Encoding::PCM16) {
     ndspCfg |= NDSP_FORMAT_PCM16;
-  } else if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+  } else if (encoding == ctrff::BCSTM::Encoding::DSP_ADPCM) {
     ndspCfg |= NDSP_FORMAT_ADPCM;
   }
 
@@ -95,7 +95,7 @@ void CTRFFDec::Play() {
     }
 
     ndspChnSetMix(pChannels[i], mix);
-    if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+    if (encoding == ctrff::BCSTM::Encoding::DSP_ADPCM) {
       ndspChnSetAdpcmCoefs(pChannels[i],
                            pCurrentFile.pDSP_ADPCM_Info[i].Param.Coefficients);
     }
@@ -188,7 +188,7 @@ void CTRFFDec::pFillBuffers() {
       pCurrentFile.ReadBlock(pCurrentBlock, data);
       DSP_FlushDataCache(data, pCurrentFile.GetBlockSize());
 
-      if (encoding == ctrff::BCSTM::DSP_ADPCM) {
+      if (encoding == ctrff::BCSTM::Encoding::DSP_ADPCM) {
         buf->data_adpcm = data;
         if (pCurrentBlock == 0) {
           buf->adpcm_data =
@@ -198,8 +198,8 @@ void CTRFFDec::pFillBuffers() {
               (ndspAdpcmData *)&pCurrentFile.pDSP_ADPCM_Info[chn_idx]
                   .LoopContext;
         }
-      } else if (encoding == ctrff::BCSTM::PCM8 ||
-                 encoding == ctrff::BCSTM::PCM16) {
+      } else if (encoding == ctrff::BCSTM::Encoding::PCM8 ||
+                 encoding == ctrff::BCSTM::Encoding::PCM16) {
         buf->data_vaddr = data;
       }
 

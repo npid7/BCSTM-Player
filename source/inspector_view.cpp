@@ -376,7 +376,7 @@ void Inspector::ReadFile(const std::string& path) {
   List.clear();
   pPath = path;
   ctrff::BCSTM b;
-  b.LoadFile(path);
+  b.Load(path);
   List.push_back(MakeHeader(b));
   List.push_back(MakeInfoBlock(b.pInfoBlock));
   List.push_back(MakeDspAdpcmInfoList(b.pDSP_ADPCM_Info));
