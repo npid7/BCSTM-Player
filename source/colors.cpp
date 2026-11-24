@@ -1,4 +1,5 @@
 #include <colors.hpp>
+#include <nlohmann/json.hpp>
 
 void Theme::Save(const std::string& path) {
   nlohmann::json js;

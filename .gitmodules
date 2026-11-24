@@ -4,3 +4,6 @@
 [submodule "palladium"]
 	path = palladium
 	url = https://github.com/tobid7/palladium
+[submodule "json"]
+	path = json
+	url = https://github.com/nlohmann/json.git

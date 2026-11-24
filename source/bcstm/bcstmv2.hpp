@@ -6,7 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <palladium>
-#include <pd-3ds/bknd-gfx.hpp>
+#include <pd_system/ctr-linear-allocator.hpp>
 
 namespace D7 {
 class BCSTM2 : public BCSTMPlayerBase {

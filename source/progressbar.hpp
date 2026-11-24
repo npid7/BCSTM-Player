@@ -23,13 +23,13 @@ class Progressbar : public PD::UI7::Container {
     auto p = FinalPos();
     list->DrawRectFilled(
         p, GetSize(),
-        this->GetIO()->Theme->Get(UI7Color_FrameBackgroundHovered));
+        this->GetIO()->Theme.Get(UI7Color_FrameBackgroundHovered));
     list->DrawRectFilled(p + PD::fvec2(2), GetSize() - 4,
-                         this->GetIO()->Theme->Get(UI7Color_FrameBackground));
+                         this->GetIO()->Theme.Get(UI7Color_FrameBackground));
 
     list->DrawRectFilled(p + PD::fvec2(2),
                          PD::fvec2((GetSize().x - 4) * pVal, GetSize().y - 4),
-                         this->GetIO()->Theme->Get(UI7Color_Progressbar));
+                         this->GetIO()->Theme.Get(UI7Color_Progressbar));
   }
 
  private:

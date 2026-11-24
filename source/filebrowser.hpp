@@ -10,21 +10,22 @@
 
 class FileMgr : public Stage {
  public:
-  FileMgr(PD::Li::Font::Ref f, D7::Lang& l, BCSTM_Ctrl& c)
+  FileMgr(PD::Li::Font* f, D7::Lang& l, BCSTM_Ctrl& c)
       : Stage(f), Lang(l), ctrl(c) {
     ScanDir("sdmc:/");
-    PD::Image::Ref img = PD::Image::New("romfs:/gfx/folder_small.png");
-    pIcnFolder =
-        PD::Gfx::LoadTex(img->pBuffer, img->Width(), img->Height(),
-                         PD::Li::Texture::RGBA32, PD::Li::Texture::NEAREST);
-    img = PD::Image::New("romfs:/gfx/file_small.png");
-    pIcnFile =
-        PD::Gfx::LoadTex(img->pBuffer, img->Width(), img->Height(),
-                         PD::Li::Texture::RGBA32, PD::Li::Texture::NEAREST);
-    img = PD::Image::New("romfs:/gfx/audiofile_small.png");
-    pIcnAudio =
-        PD::Gfx::LoadTex(img->pBuffer, img->Width(), img->Height(),
-                         PD::Li::Texture::RGBA32, PD::Li::Texture::NEAREST);
+    PD::Image img;
+    img.Load("romfs:/gfx/folder_small.png");
+    pIcnFolder = PD::Gfx::LoadTexture(img.data(), img.Width(), img.Height(),
+                                      PD::TextureFormat::RGBA32,
+                                      PD::TextureFilter::Nearest);
+    img.Load("romfs:/gfx/file_small.png");
+    pIcnFile = PD::Gfx::LoadTexture(img.data(), img.Width(), img.Height(),
+                                    PD::TextureFormat::RGBA32,
+                                    PD::TextureFilter::Nearest);
+    img.Load("romfs:/gfx/audiofile_small.png");
+    pIcnAudio = PD::Gfx::LoadTexture(img.data(), img.Width(), img.Height(),
+                                     PD::TextureFormat::RGBA32,
+                                     PD::TextureFilter::Nearest);
   }
   ~FileMgr() = default;
   PD_SHARED(FileMgr)
@@ -43,9 +44,9 @@ class FileMgr : public Stage {
   };
   std::vector<FSEntry> list;
   std::string cPath;
-  PD::Li::Texture::Ref pIcnFolder = nullptr;
-  PD::Li::Texture::Ref pIcnFile = nullptr;
-  PD::Li::Texture::Ref pIcnAudio = nullptr;
+  PD::Li::Texture pIcnFolder;
+  PD::Li::Texture pIcnFile;
+  PD::Li::Texture pIcnAudio;
   D7::Lang& Lang;
   BCSTM_Ctrl& ctrl;
   bool pShowHelp = false;

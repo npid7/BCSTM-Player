@@ -1,5 +1,26 @@
-#include <pd-3ds.hpp>
+#include <unwind.h>
+
+#include <iostream>
+#include <palladium>
 #include <pd_ctr_ext.hpp>
+#include <pdsystem>
+
+_Unwind_Reason_Code TraceCallback(_Unwind_Context* ctx, void* data) {
+  auto* ss = static_cast<std::stringstream*>(data);
+  void* pc = reinterpret_cast<void*>(_Unwind_GetIP(ctx));
+
+  if (pc) {
+    *ss << "[PC]: 0x" << std::hex << std::uppercase
+        << reinterpret_cast<uintptr_t>(pc) << "\n";
+  }
+  return _URC_NO_REASON;
+}
+
+std::string GetStackTrace() {
+  std::stringstream ss;
+  _Unwind_Backtrace(&TraceCallback, &ss);
+  return ss.str();
+}
 
 constexpr u32 DisplayTransferFlags =
     (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) |
@@ -10,14 +31,15 @@ constexpr u32 DisplayTransferFlags =
 bool pExceptionCtx = false;
 bool pExceptionCtxA = false;
 /** Seems to not work if it happens in another thread */
-void HandleException(const std::string& e) {
+void HandleException(const char* e) {
   pExceptionCtx = true;
   while (!pExceptionCtxA) {
   }
   gfxInitDefault();
   consoleInit(GFX_TOP, nullptr);
   std::cout << "Palladium Exception Handler\n\n";
-  std::cout << "Exeption: \n\n" << e << "\n\n";
+  std::cout << "Exeption: \n\n" << (e ? e : "Unknown") << "\n\n";
+  std::cout << "Stacktrace:\n" << GetStackTrace() << "\n\n";
   std::cout << "Press Start to Exit!" << std::endl;
   while (aptMainLoop()) {
     hidScanInput();
@@ -73,7 +95,9 @@ Context* CreateContext() {
                             DisplayTransferFlags);
   C3D_RenderTargetSetOutput(NewCtx->Bottom, GFX_BOTTOM, GFX_LEFT,
                             DisplayTransferFlags);
-  PD::Init();
+  PD::Gfx::UseDriver<PD::GfxCitro3D>();
+  PD::Hid::UseDriver<PD::Hid3DS>();
+  PD::Gfx::Init();
   if (ActiveContext == nullptr) {
     ActiveContext = NewCtx;
   }
@@ -93,6 +117,7 @@ bool ContextUpdate() {
   PD::TT::Scope s("CtxUpdateSync");
   auto c = CheckContext();
   PD::Gfx::NewFrame();
+  PD::Li::ResetPools();
   C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
   PD::TT::Scope s2("CtxUpdate");
   C3D_RenderTargetClear(c->Top, C3D_CLEAR_ALL, 0x00000000, 0);

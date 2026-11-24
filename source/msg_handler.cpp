@@ -5,29 +5,32 @@ void MsgHandler::Elem::Render() {
   if (!pSettings) {
     return;
   }
-  Rendered->Layer(pSettings->BaseLayer);
-  Rendered->DrawSolid();  // Draw Solid
-  Rendered->SetFontScale(pSettings->FontScale);
-  Rendered->DrawRectFilled(Pos, pSettings->MsgSize,
-                           pSettings->ClrBackground);  // Background
+  // Rendered.Layer(pSettings->BaseLayer);
+  Rendered.UnbindTexture();  // Draw Solid
+  Rendered.SetFontscale(pSettings->FontScale);
+  Rendered.DrawRectFilled(Pos, pSettings->MsgSize,
+                          pSettings->ClrBackground);  // Background
   // Draw Line (if enabled)
-  Rendered->PathAdd(Pos.Get() + PD::fvec2(2, 13));
-  Rendered->PathAdd(Pos.Get() + PD::fvec2(pSettings->MsgSize.x - 4, 13));
-  Rendered->PathStroke(PD::Color("#ffffff"));
+  Rendered.PathAdd(Pos.Get() + PD::fvec2(2, 13));
+  Rendered.PathAdd(Pos.Get() + PD::fvec2(pSettings->MsgSize.x - 4, 13));
+  Rendered.PathStroke(PD::Color("#ffffff"));
   // Draw Header and Body
-  Rendered->pLayer++;
-  Rendered->DrawText(Pos.Get() + PD::fvec2(2, 0), Header, pSettings->ClrText);
+  // Rendered.pLayer++;
+  Rendered.DrawText(Pos.Get() + PD::fvec2(2, 0), Header.c_str(),
+                    pSettings->ClrText);
   PD::fvec2 tp = Pos.Get() + PD::fvec2(2, 13);
   PD::fvec2 bs = pSettings->MsgSize - PD::fvec2(4, 13);
-  Rendered->DrawTextEx(tp, Body, pSettings->ClrText, LiTextFlags_Wrap, bs);
+  Rendered.DrawTextEx(tp, Body.c_str(), pSettings->ClrText, LiTextFlags_Wrap,
+                      bs);
   // Debug stuff
   if (pSettings->Debug) {
-    Rendered->DrawText(
+    Rendered.DrawText(
         Pos.Get() + PD::fvec2(pSettings->MsgSize.x + 2, 0),
-        std::format("{:.1f}\n[{:.0f}, {:.0f}]", Time, Pos.Get().x, Pos.Get().y),
+        std::format("{:.1f}\n[{:.0f}, {:.0f}]", Time, Pos.Get().x, Pos.Get().y)
+            .c_str(),
         PD::Color("#ff00ff"));
   }
-  Rendered->pLayer--;
+  // Rendered.pLayer--;
 }
 
 void MsgHandler::Elem::SlideIn() {
@@ -75,12 +78,13 @@ void MsgHandler::Elem::Move(int idx) {
 
 void MsgHandler::Push(const std::string& head, const std::string& Body) {
   // Append a new element to the start
-  pElems.emplace(pElems.begin(), head, Body, pFont, &pSettings);
+  pElems.emplace(pElems.begin(),
+                 std::make_unique<Elem>(head, Body, pFont, &pSettings));
 }
 
 void MsgHandler::Update(float d) {
   // Clear of course
-  pDrawData->Clear();
+  pDrawData.Clear();
   // Loop over every element
   for (size_t i = 0; i < pElems.size(); i++) {
     // Delete every element that is oos
@@ -89,27 +93,28 @@ void MsgHandler::Update(float d) {
       continue;
     }
     // Push up time by delta
-    pElems[i].Time += d * 0.001;
+    pElems[i]->Time += d * 0.001;
     // Slide out element after MaxTime
-    if (pElems[i].Time > pSettings.MaxTime && !pElems[i].ToBeRemoved) {
-      pElems[i].SlideOut();
+    if (pElems[i]->Time > pSettings.MaxTime && !pElems[i]->ToBeRemoved) {
+      pElems[i]->SlideOut();
     }
     // Remove elem if removable (oos)
-    if (pElems[i].Removable()) {
+    if (pElems[i]->Removable()) {
       pElems.erase(pElems.begin() + i);
       continue;  // and continue of course
     }
     // Move element to new index if not matching anymore
-    if (pElems[i].MyIdx != i) {
-      pElems[i].Move(i);
+    if (pElems[i]->MyIdx != i) {
+      pElems[i]->Move(i);
     }
 
-    pElems[i].Pos.Update(d);  // Update the animation handler (PD::Tween Engine)
-    pElems[i].Render();       // Render the element
-    pDrawData->Merge(pElems[i].Rendered);  // Append to Universal Drawlist
+    pElems[i]->Pos.Update(
+        d);               // Update the animation handler (PD::Tween Engine)
+    pElems[i]->Render();  // Render the element
+    pDrawData.Merge(pElems[i]->Rendered);  // Append to Universal Drawlist
   }
 }
 
 // Just return the drawlist ref
-PD::Li::DrawList::Ref MsgHandler::GetDrawList() { return pDrawData; }
+PD::Li::Drawlist& MsgHandler::GetDrawList() { return pDrawData; }
 }  // namespace D7

@@ -4,10 +4,10 @@
 
 namespace D7 {
 void App::Run() {
-  pLast = PD::OS::GetNanoTime();
+  pLast = PD::Os::GetTimeNano();
   while (aptMainLoop() && !pExit) {
     PD::TT::Scope st("App");
-    PD::u64 c = PD::OS::GetNanoTime();
+    PD::u64 c = PD::Os::GetTimeNano();
     pDelta = static_cast<double>(static_cast<double>(c) -
                                  static_cast<double>(pLast)) *
              0.000001;

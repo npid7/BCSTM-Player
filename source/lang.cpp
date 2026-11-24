@@ -1,4 +1,5 @@
 #include <lang.hpp>
+#include <nlohmann/json.hpp>
 
 std::string pLangErr = "[KEY_NOT_FOUND]";
 

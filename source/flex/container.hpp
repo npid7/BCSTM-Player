@@ -1,7 +1,15 @@
 #pragma once
 
 #include <colors.hpp>
+#include <memory>
 #include <palladium>
+
+#define PD_SHARED(x)                                         \
+  using Ref = std::shared_ptr<x>;                            \
+  template <typename... Args>                                \
+  static Ref New(Args&&... args) {                           \
+    return std::make_shared<x>(std::forward<Args>(args)...); \
+  }
 
 namespace PD {
 namespace Flex {
@@ -11,7 +19,7 @@ class Container {
   ~Container() = default;
   PD_SHARED(Container)
 
-  virtual void Draw(PD::Li::DrawList::Ref l) const {}
+  virtual void Draw(PD::Li::Drawlist& l) const {}
 
   Theme* gTheme;
 };

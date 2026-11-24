@@ -7,7 +7,7 @@
 
 class Inspector : public Stage {
  public:
-  Inspector(PD::Li::Font::Ref f) : Stage(f) {}
+  Inspector(PD::Li::Font* f) : Stage(f) {}
   ~Inspector() = default;
   PD_SHARED(Inspector)
 

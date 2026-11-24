@@ -7,7 +7,7 @@
 
 class InspectorBCWAV : public Stage {
  public:
-  InspectorBCWAV(PD::Li::Font::Ref f) : Stage(f) {}
+  InspectorBCWAV(PD::Li::Font* f) : Stage(f) {}
   ~InspectorBCWAV() = default;
   PD_SHARED(InspectorBCWAV)
 

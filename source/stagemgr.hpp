@@ -2,10 +2,11 @@
 
 #include <flex/flex.hpp>
 #include <palladium>
+#include <stack>
 
 class Stage {
  public:
-  Stage(PD::Li::Font::Ref f) {
+  Stage(PD::Li::Font* f) {
     Top = PD::Flex::Context::New(f);
     Bottom = PD::Flex::Context::New(f);
   }
@@ -20,16 +21,16 @@ class Stage {
   static void Goto(Stage::Ref s) { pStages.push(s); }
   static void Back() { pStages.pop(); }
   static void DoUpdate() {
-    pStages.top()->Top->pDrawList->Clear();
-    pStages.top()->Bottom->pDrawList->Clear();
+    pStages.top()->Top->pDrawList.Clear();
+    pStages.top()->Bottom->pDrawList.Clear();
     pStages.top()->Update();
     pStages.top()->Top->Update();
     pStages.top()->Bottom->Update();
   };
-  static PD::Li::DrawList::Ref GetDrawDataTop() {
+  static PD::Li::Drawlist& GetDrawDataTop() {
     return pStages.top()->Top->pDrawList;
   }
-  static PD::Li::DrawList::Ref GetDrawDataBottom() {
+  static PD::Li::Drawlist& GetDrawDataBottom() {
     return pStages.top()->Bottom->pDrawList;
   }
   static void SetTheme(Theme& t) { pTheme = &t; }

@@ -4,7 +4,8 @@
 
 #include <bcstm/base.hpp>
 #include <ctrff.hpp>
-#include <pd-3ds/bknd-gfx.hpp>
+#include <palladium>
+#include <pd_system/ctr-linear-allocator.hpp>
 
 namespace D7 {
 class CTRFFDec : public BCSTMPlayerBase {
@@ -15,7 +16,7 @@ class CTRFFDec : public BCSTMPlayerBase {
   };
   ~CTRFFDec() { CleanUp(); }
 
-  void LoadFile(const std::string &path);
+  void LoadFile(const std::string& path);
   void Stream();
 
   void CleanUp();

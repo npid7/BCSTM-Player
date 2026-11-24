@@ -61,7 +61,7 @@ void FileMgr::Update() {
         .SetColor(GetTheme().Slider);
   }
   if (!pShowHelp) {
-    if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
+    if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Down) &&
         sp + cursor.pIndex < (int)list.size() - 1) {
       if (cursor.pIndex == 11) {
         sp++;
@@ -69,7 +69,7 @@ void FileMgr::Update() {
         cursor++;
       }
     }
-    if (PD::Hid::IsUp(PD::Hid::Key::Right) &&
+    if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Right) &&
         sp + cursor.pIndex + 5 < (int)list.size()) {
       if (cursor.pIndex == 11) {
         sp += 5;
@@ -82,14 +82,16 @@ void FileMgr::Update() {
         }
       }
     }
-    if (PD::Hid::IsUp(PD::Hid::Key::Up) && cursor.pIndex + sp > 0) {
+    if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Up) &&
+        cursor.pIndex + sp > 0) {
       if (cursor.pIndex == 0) {
         sp--;
       } else {
         cursor--;
       }
     }
-    if (PD::Hid::IsUp(PD::Hid::Key::Left) && sp + cursor.pIndex - 5 >= 0) {
+    if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Left) &&
+        sp + cursor.pIndex - 5 >= 0) {
       if (cursor.pIndex == 0) {
         sp -= 5;
       } else {
@@ -102,7 +104,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (PD::Hid::IsDown(PD::Hid::Key::A)) {
+    if (PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::A)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Dir) {
         pLastPos.push(std::make_pair(sp, cursor.GetIndex()));
@@ -116,7 +118,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (PD::Hid::IsDown(PD::Hid::Key::B)) {
+    if (PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::B)) {
       if (cPath != "sdmc:/") {
         cPath = std::filesystem::path(cPath).parent_path().string();
         if (cPath == "sdmc:") {
@@ -134,7 +136,7 @@ void FileMgr::Update() {
       }
     }
 
-    if (PD::Hid::IsDown(PD::Hid::Key::X)) {
+    if (PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::X)) {
       auto FSE = list[cursor.pIndex + sp];
       if (FSE.Name.find(".bcstm") != FSE.Name.npos) {
         // THe hacky way
@@ -149,7 +151,7 @@ void FileMgr::Update() {
     }
   }
 
-  pShowHelp = PD::Hid::IsHeld(PD::Hid::Key::Select);
+  pShowHelp = PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::Select);
 }
 
 void FileMgr::SortList(std::vector<FSEntry>& l) {

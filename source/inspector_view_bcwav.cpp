@@ -53,7 +53,7 @@ void InspectorBCWAV::Update() {
         .SetColor(GetTheme().Slider);
   }
 
-  if (PD::Hid::IsUp(PD::Hid::Key::Down) &&
+  if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Down) &&
       sp + cursor.pIndex < (int)pDL.size() - 1) {
     if (cursor.pIndex == 11) {
       sp++;
@@ -61,7 +61,7 @@ void InspectorBCWAV::Update() {
       cursor++;
     }
   }
-  if (PD::Hid::IsUp(PD::Hid::Key::Right) &&
+  if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Right) &&
       sp + cursor.pIndex + 5 < (int)pDL.size()) {
     if (cursor.pIndex == 11) {
       sp += 5;
@@ -74,14 +74,16 @@ void InspectorBCWAV::Update() {
       }
     }
   }
-  if (PD::Hid::IsUp(PD::Hid::Key::Up) && cursor.pIndex + sp > 0) {
+  if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Up) &&
+      cursor.pIndex + sp > 0) {
     if (cursor.pIndex == 0) {
       sp--;
     } else {
       cursor--;
     }
   }
-  if (PD::Hid::IsUp(PD::Hid::Key::Left) && sp + cursor.pIndex - 5 >= 0) {
+  if (PD::Hid::IsEvent(PD::Hid::Event::Up, PD::Hid::Gamepad::Left) &&
+      sp + cursor.pIndex - 5 >= 0) {
     if (cursor.pIndex == 0) {
       sp -= 5;
     } else {
@@ -94,7 +96,7 @@ void InspectorBCWAV::Update() {
     }
   }
 
-  if (PD::Hid::IsDown(PD::Hid::Key::A)) {
+  if (PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::A)) {
     auto FSE = pDL.at(cursor.pIndex + sp);
     if (FSE->SubData.size() != 0) {
       pLastPos.push(std::make_pair(sp, cursor.GetIndex()));
@@ -105,7 +107,7 @@ void InspectorBCWAV::Update() {
     }
   }
 
-  if (PD::Hid::IsDown(PD::Hid::Key::B)) {
+  if (PD::Hid::IsEvent(PD::Hid::Event::Down, PD::Hid::Gamepad::B)) {
     if (!pLastPos.empty()) {
       sp = pLastPos.top().first;
       cursor.SetIndex(pLastPos.top().second);

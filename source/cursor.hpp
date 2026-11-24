@@ -1,6 +1,7 @@
 #pragma once
 
 #include <colors.hpp>
+#include <flex/container.hpp>
 #include <palladium>
 
 constexpr int elms_onscreen = 12;

@@ -56,8 +56,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 add_subdirectory(palladium)
-add_subdirectory(palladium/backends/3ds)
 add_subdirectory(ctrff)
+add_subdirectory(json)
 
 # Set Executable and its sources
 add_executable(BCSTM-Player
@@ -79,7 +79,7 @@ add_executable(BCSTM-Player
 )
 
 # Set dependencies, include dirs and definitions
-target_link_libraries(BCSTM-Player PUBLIC m ctrff pd-3ds palladium citro3d ctrud)
+target_link_libraries(BCSTM-Player PUBLIC m ctrff nlohmann_json pd-system palladium citro3d ctrud)
 target_include_directories(BCSTM-Player PUBLIC
     source
     ${DEVKITPRO}/portlibs/3ds/include

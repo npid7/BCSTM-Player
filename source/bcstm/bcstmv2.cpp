@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 
 #include <bcstm/bcstmv2.hpp>
+#include <iostream>
 
 void D7::BCSTM2::LoadFile(const std::string& path) {
   Stop();

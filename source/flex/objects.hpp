@@ -35,7 +35,7 @@ class Rect : public Container {
   fvec2 GetSize() const { return pSize; }
   u32 GetColor() const { return pColor; }
 
-  void Draw(PD::Li::DrawList::Ref l) const override;
+  void Draw(PD::Li::Drawlist& l) const override;
 
   fvec2 pPos;
   fvec2 pSize;
@@ -70,7 +70,7 @@ class Triangle : public Container {
   fvec2 GetPosC() const { return pPosC; }
   u32 GetColor() const { return pColor; }
 
-  void Draw(PD::Li::DrawList::Ref l) const override;
+  void Draw(PD::Li::Drawlist& l) const override;
 
   fvec2 pPosA;
   fvec2 pPosB;
@@ -84,7 +84,7 @@ class Button : public Container {
   ~Button() {}
   PD_SHARED(Button)
 
-  void Draw(PD::Li::DrawList::Ref l) const override;
+  void Draw(PD::Li::Drawlist& l) const override;
 
   Button& OnPress(std::function<void()> f) {
     pOnPress = f;
@@ -124,7 +124,7 @@ class Text : public Container {
   u32 GetColor() const { return pColor; }
   const std::string& GetText() const { return pText; }
 
-  void Draw(PD::Li::DrawList::Ref l) const override;
+  void Draw(PD::Li::Drawlist& l) const override;
 
   std::string pText;
   fvec2 pPos;
@@ -150,18 +150,18 @@ class Image : public Container {
     pColor = c;
     return *this;
   }
-  Image& SetImage(PD::Li::Texture::Ref t) {
+  Image& SetImage(PD::Li::Texture t) {
     pTex = t;
     return *this;
   }
   fvec2 GetPos() const { return pPos; }
   fvec2 GetSize() const { return pSize; }
   u32 GetColor() const { return pColor; }
-  PD::Li::Texture::Ref GetImage() const { return pTex; }
+  PD::Li::Texture GetImage() const { return pTex; }
 
-  void Draw(PD::Li::DrawList::Ref l) const override;
+  void Draw(PD::Li::Drawlist& l) const override;
 
-  PD::Li::Texture::Ref pTex;
+  PD::Li::Texture pTex;
   fvec2 pPos;
   fvec2 pSize = fvec2(-1.f, -1.f);
   u32 pColor = 0xffffffff;
